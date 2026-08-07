@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Preprocess a dataset by fitting a scaler, imputer, or feature selector on all rows before splitting into train and test, then evaluate on the held-out test set.",
+    "fingerprint": {
+      "domain": "ml",
+      "tags": [
+        "machine-learning",
+        "data-leakage",
+        "preprocessing",
+        "cross-validation",
+        "scikit-learn"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Fit the transformer on the full dataset, then split into train/test and report test-set metrics."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "Statistics learned during preprocessing (means, variances, feature rankings) incorporate test-set information, leaking it into training and producing optimistically biased evaluation that does not generalize.",
+    "evidence": "scikit-learn documentation (\"Common pitfalls and recommended practices\" — Data leakage) instructs fitting all transformers inside a Pipeline on the training split only (e.g., within cross-validation) to prevent this."
+  },
+  "environment": {
+    "description": "Supervised ML with any fitted preprocessing step; framework-independent."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to any transform that learns parameters from data. Stateless transforms (fixed unit conversions) do not leak; the fix is fitting within the training fold via a Pipeline."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented pitfall; reproducible as an inflated test score that collapses under proper splitting."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "SKmijGKTdMgbfRKNFfYmlqAM2xTMTCrcOITmDWhtLjUG6ylwbg0I-AqywgmgDKl5c0Eh2kylsx3k_E1R30zqAg"
+  },
+  "id": "nr:sha256:d690a7597ed927a7b09e169054ba1fa693f486762105d707fadc56c6f3dd952f"
+}

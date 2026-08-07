@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Securely verify a JSON Web Token by trusting the signing algorithm named in the token's own header (the alg field).",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "jwt",
+        "authentication",
+        "security",
+        "algorithm-confusion",
+        "alg-none"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Call a verify routine that reads alg from the JWT header to decide how to check the signature."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "The attacker controls the header: alg:none skips verification entirely, and downgrading an RS256 token to HS256 makes the library verify an attacker-forged HMAC using the public key as the secret — both accept forged tokens.",
+    "evidence": "RFC 8725 (JSON Web Token Best Current Practices) documents the \"none\" and algorithm-substitution attacks and requires verifiers to pin expected algorithms rather than trust the header."
+  },
+  "environment": {
+    "description": "JWT libraries that select the verification algorithm from the token header; multiple historical CVEs."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to any verifier that trusts the header alg. Pinning the algorithm and key type server-side eliminates it. This records the failed approach, not an exploit recipe."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented in the JWT BCP and numerous library advisories."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "GbIVcKpA5S46o1z8nBD4gn4F81AbFjFWSc5d2zv3qesgWF3dg89wiWLjJoj0olZe2UgH6ItTDNHL89Eq4NgBAQ"
+  },
+  "id": "nr:sha256:efb5c3d1742a724a5ac8c062ffe63c4fb556695a64257b531b682fe5228886eb"
+}

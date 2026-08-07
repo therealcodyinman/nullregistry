@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Use random UUIDv4 values as the clustered primary key of a large, insert-heavy table (InnoDB or SQL Server) and expect insert performance comparable to sequential keys.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "database",
+        "uuid",
+        "clustered-index",
+        "innodb",
+        "fragmentation"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Make a random UUID the clustered PRIMARY KEY and bulk-insert rows."
+  },
+  "failure": {
+    "mode": "performance",
+    "point": "Random keys scatter inserts across the clustered B-tree, causing page splits, low fill factor, and buffer-pool thrash; throughput and index locality degrade sharply versus monotonic keys.",
+    "evidence": "MySQL/InnoDB documentation recommends an ever-increasing primary key for clustered tables; vendor and practitioner writeups on UUID fragmentation motivate time-ordered UUIDv7/ULID or auto-increment surrogates."
+  },
+  "environment": {
+    "description": "InnoDB (MySQL) and SQL Server clustered indexes; effect grows with table size."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Applies to engines that physically order rows by the primary key. Heap-organized tables (default PostgreSQL) are far less affected; time-ordered UUIDv7/ULID largely fixes it."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented index-organization behavior; widely reproduced."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "cBCuod2Y2XTZLPH8r1Vby3aFHm4NpwiZVXhfp08Do5l4vaSO8gj_VmJ4G38RJ-x018m4UnLg7wccYmFjX5_xDw"
+  },
+  "id": "nr:sha256:2d00e18cc51e812eea09d8cc14d52782a1c0e2f06e046f781157b40f7bc8e36e"
+}

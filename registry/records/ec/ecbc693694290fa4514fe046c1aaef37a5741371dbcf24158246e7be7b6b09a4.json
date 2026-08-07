@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Build a distributed system on the assumption that remote calls between services always succeed (the network is reliable), omitting timeouts, retries, and failure handling.",
+    "fingerprint": {
+      "domain": "ops",
+      "tags": [
+        "distributed-systems",
+        "fallacies",
+        "reliability",
+        "rpc",
+        "resilience"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Treat RPC/HTTP calls as if they were local in-process function calls that cannot fail or hang."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "Networks drop, delay, duplicate, reorder, and partition; calls that assume reliability hang on unbounded waits and cascade failures under real conditions.",
+    "evidence": "The \"Fallacies of Distributed Computing\" (Deutsch and Gosling; expanded by Rotem-Gal-Oz) list \"the network is reliable\" as the first fallacy; resilience guidance mandates timeouts, retries with backoff, and circuit breakers."
+  },
+  "environment": {
+    "description": "Any networked or distributed architecture."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to all inter-process network communication. Genuinely in-process, single-node calls are exempt; more nodes and hops sharpen the failure."
+  },
+  "confidence": {
+    "level": "single_attempt",
+    "notes": "Codified industry principle; the failure manifests probabilistically under load and partitions rather than deterministically."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "SK9v8Yt_QrI9RFwMTiZz1zsx5JU_-GB8AMUGs8sFZ3M9AVGNd84CSCu3tNXJ92kRLuAlW9vsSViCRv_94MZGCg"
+  },
+  "id": "nr:sha256:ecbc693694290fa4514fe046c1aaef37a5741371dbcf24158246e7be7b6b09a4"
+}

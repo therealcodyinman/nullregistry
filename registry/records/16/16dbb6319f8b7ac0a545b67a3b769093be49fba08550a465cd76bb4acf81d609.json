@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Match arbitrarily deep balanced or nested delimiters (parentheses, or well-formed HTML) using a classical regular expression.",
+    "fingerprint": {
+      "domain": "math",
+      "tags": [
+        "formal-languages",
+        "regular-expressions",
+        "pumping-lemma",
+        "context-free",
+        "parsing"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Write a true regular expression (no recursion or balancing extensions) that validates arbitrarily nested balanced brackets."
+  },
+  "failure": {
+    "mode": "dead_end_reasoning",
+    "point": "The language of balanced parentheses is context-free but not regular; a finite automaton cannot count unbounded nesting depth, as shown by the pumping lemma for regular languages.",
+    "evidence": "Standard formal-language theory (the pumping lemma; Sipser, Introduction to the Theory of Computation) proves balanced-bracket and HTML languages are non-regular. Modern regex engines match them only via non-regular recursion or balancing-group extensions."
+  },
+  "environment": {
+    "description": "Classical regular expressions / finite automata, without recursive or balancing extensions."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to genuinely regular expressions. Engines with recursion (PCRE (?R)) or .NET balancing groups exceed regular power and can match balanced input; a real parser is the standard tool."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Settled result in automata theory."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "Dx4o3RPZnTmAgSKHCCChs4eFmU-EB6gogsePte4cGC4-xt0kpC6QpEtTMUhe0BgY_TL_RO5fqd4x0Z__ZMOPDw"
+  },
+  "id": "nr:sha256:16dbb6319f8b7ac0a545b67a3b769093be49fba08550a465cd76bb4acf81d609"
+}

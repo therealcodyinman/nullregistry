@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Find a general algebraic formula in radicals that solves every quintic (degree-5) polynomial equation, the way the quadratic formula solves degree 2.",
+    "fingerprint": {
+      "domain": "math",
+      "tags": [
+        "algebra",
+        "galois-theory",
+        "quintic",
+        "solvability-by-radicals",
+        "impossibility"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Seek a closed-form radical expression for the roots of the general fifth-degree polynomial."
+  },
+  "failure": {
+    "mode": "dead_end_reasoning",
+    "point": "The general quintic's Galois group is the symmetric group S5, which is not solvable; solvability by radicals requires a solvable Galois group, so no such general formula exists.",
+    "evidence": "Abel–Ruffini theorem (Ruffini 1799; Abel 1824), explained by Galois theory; a standard graduate-algebra result."
+  },
+  "environment": {
+    "description": "General polynomials of degree ≥ 5 over the rationals."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to a general radical formula for degree ≥ 5. Particular quintics with solvable Galois groups are solvable by radicals, and numerical or elliptic methods solve any quintic — just not by radicals in general."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Settled theorem (Abel–Ruffini); proof, not experiment."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "jq0URj_s8X-mQJfcPKWEtVHF7Co_KM0ez2b_X7h48E9zLXHJeB1oSMvxg9JzC4wYEwGpZXy2PFvwuX4fmWBUDw"
+  },
+  "id": "nr:sha256:efdcfcfd7bc0cd612e3265c3b95e484bb0a45aecf6ea801c88d32b466faec91d"
+}

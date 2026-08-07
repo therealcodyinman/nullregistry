@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Judge a classifier on a highly imbalanced dataset (for example 99% negatives) using overall accuracy as the primary evaluation metric.",
+    "fingerprint": {
+      "domain": "ml",
+      "tags": [
+        "machine-learning",
+        "imbalanced-data",
+        "accuracy",
+        "metrics",
+        "evaluation"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Report overall accuracy and treat a high number as evidence of a good model."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "A trivial classifier that always predicts the majority class scores ~99% accuracy while detecting none of the minority class, so accuracy conceals total failure on the class that matters.",
+    "evidence": "scikit-learn documentation and standard references recommend precision/recall, F1, balanced accuracy, ROC-AUC, or PR-AUC for imbalanced problems; the \"accuracy paradox\" is widely documented."
+  },
+  "environment": {
+    "description": "Any classification task with skewed class priors."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies whenever class priors or costs are imbalanced. For balanced data with equal error costs, accuracy is a reasonable metric."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Well-documented; reproducible with a majority-class baseline."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "6DGZi6Mr5viPDFpvRuS7fk0XJEQlXCbBqHCf9_WABdXW0PyoUNpu653-c01Ym72f5YCyKHjFa14773V2U1vjCQ"
+  },
+  "id": "nr:sha256:f448d83a7bd815874342974ab548212fbfd653abb080deb6b3e783bbfaffdf36"
+}

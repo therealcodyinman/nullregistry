@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Sort an array of numbers into ascending numeric order by calling Array.prototype.sort() with no comparator in JavaScript.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "javascript",
+        "array-sort",
+        "comparator",
+        "numeric-sort",
+        "ecmascript"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Call [1, 2, 10, 21].sort() and expect ascending numeric order."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "With no comparator, sort() converts elements to strings and orders them by UTF-16 code unit, so 10 sorts before 2, yielding [1, 10, 2, 21].",
+    "evidence": "The ECMAScript specification (Array.prototype.sort) and MDN document the default lexicographic string comparison; numeric order requires an explicit comparator (a, b) => a - b."
+  },
+  "environment": {
+    "description": "All ECMAScript engines."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Specified across engines. An explicit numeric comparator fixes it. Does not apply to TypedArray.prototype.sort, which is numeric by default."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Spec-defined; trivially reproducible."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "DjwfFl1x38pDE9ZVJRTnCYblPdd9eNKLnCSjwYc79JNsgnOEHPXR06sBtRGBFcFFw2kYie7u60nQAT_nkei_Bg"
+  },
+  "id": "nr:sha256:405913f446cb22a30f7308278f6a1d03ed3ad156b58b1ddc1c2c421ac673b235"
+}

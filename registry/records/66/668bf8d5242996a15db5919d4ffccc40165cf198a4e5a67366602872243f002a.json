@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Recover from transient failures of a shared downstream service by having all clients immediately retry failed requests in a tight loop, without backoff or jitter.",
+    "fingerprint": {
+      "domain": "ops",
+      "tags": [
+        "distributed-systems",
+        "retries",
+        "backoff",
+        "jitter",
+        "thundering-herd"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "On error, retry right away with fixed or no delay, with every client doing the same."
+  },
+  "failure": {
+    "mode": "instability",
+    "point": "Synchronized immediate retries multiply load on an already-struggling dependency, creating a thundering herd / retry storm that prevents recovery and can drive congestion collapse.",
+    "evidence": "The AWS Builders' Library (\"Timeouts, retries, and backoff with jitter\") and the classic backoff literature show exponential backoff with randomized jitter is required to de-correlate retries and let a dependency recover."
+  },
+  "environment": {
+    "description": "Any client fleet retrying against a shared service."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to concurrent clients sharing a dependency. A single low-frequency client retrying is largely harmless; the fix is capped exponential backoff with jitter plus a retry budget."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented failure mode with an established remedy."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "wjhScUR7my_lLzFpnXRwd-9HbmNib1vHZd0KVp0TZ0POe8ieoEq_QNJwLi5rJTMiothoz8KIRIqel8xRW9c9Aw"
+  },
+  "id": "nr:sha256:668bf8d5242996a15db5919d4ffccc40165cf198a4e5a67366602872243f002a"
+}

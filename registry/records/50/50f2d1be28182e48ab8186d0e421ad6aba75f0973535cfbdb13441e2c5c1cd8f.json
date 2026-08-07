@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Trisect an arbitrary given angle using only an unmarked straightedge and compass in a finite number of steps.",
+    "fingerprint": {
+      "domain": "math",
+      "tags": [
+        "geometry",
+        "compass-and-straightedge",
+        "constructibility",
+        "trisection",
+        "impossibility"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Search for a finite compass-and-straightedge construction that divides any given angle into three equal parts."
+  },
+  "failure": {
+    "mode": "dead_end_reasoning",
+    "point": "Trisecting a general angle (e.g. 60°) requires solving an irreducible cubic, producing a number of degree 3 over the rationals, which is not constructible because constructible numbers have degree a power of 2.",
+    "evidence": "Proven impossible by Pierre Wantzel (1837) using field theory; a standard result in abstract algebra (constructible numbers lie in a tower of quadratic extensions)."
+  },
+  "environment": {
+    "description": "Classical Euclidean construction with an unmarked straightedge and compass."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "The impossibility is for a general angle with the classical tools only. Specific angles (90°, 45°) are trisectable, and relaxing the tools (marked ruler/neusis, origami) makes trisection possible."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Settled theorem (Wantzel, 1837); the \"reproduction\" is the proof, not an experiment."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "Y-xa3tnfcVUKfDOUqUBtgS2HeBur3Lrk8EQdnmCtrUpK7DMoAiXkaFs9aDyWmYefJlsuC61LeZJlC0Sl71-uCg"
+  },
+  "id": "nr:sha256:50f2d1be28182e48ab8186d0e421ad6aba75f0973535cfbdb13441e2c5c1cd8f"
+}

@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Iterate safely over files, including names with spaces or newlines, by writing `for f in $(ls)` in a shell script.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "bash",
+        "shell",
+        "word-splitting",
+        "globbing",
+        "filenames"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Loop with for f in $(ls) (or $(ls *.txt)) and process each $f."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "Command substitution undergoes word-splitting and globbing, so filenames containing spaces, tabs, newlines, or glob characters are split apart or expanded incorrectly.",
+    "evidence": "Documented in the shell pitfalls references (BashFAQ 001, Greg's Wiki ParsingLs) and flagged by ShellCheck (SC2045); the recommended forms are a glob loop `for f in ./*` or `find … -print0 | while IFS= read -r -d '' f`."
+  },
+  "environment": {
+    "description": "POSIX shells / Bash."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies wherever word-splitting is in effect. A globbing for-loop or NUL-delimited find avoids it; tightly controlled filenames may hide the bug without fixing it."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Well-documented shell pitfall."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "U4sOyqm3mdDD4Vmg4YrSl8Nh-N_FFgORQo1Mqy09eGBR18WzyVP9T6ivHTrmBA2uV0s95VQqrXTIQKhPCGHYBw"
+  },
+  "id": "nr:sha256:0e20451e0924b71c4a351b513fff1f1f85b5bc07f59b31fab5c65b0446f00939"
+}

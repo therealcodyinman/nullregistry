@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Increase throughput on an existing keyed Kafka topic by adding partitions, while preserving per-key message ordering.",
+    "fingerprint": {
+      "domain": "ops",
+      "tags": [
+        "kafka",
+        "partitioning",
+        "ordering",
+        "streaming",
+        "messaging"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Raise a topic's partition count and expect messages sharing a key to keep landing on one partition in order."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "Kafka guarantees ordering only within a partition, and default key placement is hash(key) mod numPartitions; changing the partition count remaps existing keys, so a key's messages split across old and new partitions and lose order.",
+    "evidence": "Apache Kafka documentation states ordering is per-partition and that adding partitions changes key-to-partition assignment; the guidance is to over-provision partitions up front or use a stable custom partitioner."
+  },
+  "environment": {
+    "description": "Apache Kafka topics relying on key-based ordering."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Applies to keyed topics that depend on ordering. Topics without ordering requirements, or with partition count fixed from the start, are unaffected."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented partitioning semantics."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "ZmAtNwV8aHPPN1HQnFpBqRTM1zVuHfoU97O8y5rZhRmxBQRh8Hodq0p9VK9IVfRR8T-amB_Twrrs2hDgoLmVBw"
+  },
+  "id": "nr:sha256:338f1b5a04edf25988c20e4f938a3f4208318ab13e95efdd2ca131be941cac80"
+}
