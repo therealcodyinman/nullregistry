@@ -146,3 +146,19 @@ Architect: Claude. Executor: Cody. Continuing the numbering.
     this environment (`npm whoami` → ENEEDAUTH), so the package is fully prepared
     and the exact publish command is documented in the release PR; a maintainer
     with npm auth runs `npm publish --provenance` from `cli/`.
+
+---
+
+## Standard site files
+
+26. **No `manifest.json`.** The site is a two-page static commons whose primary
+    audience is agents, not an installable web app — a PWA manifest would be
+    cargo-culting. Explicitly decided against.
+
+27. **`include-hidden-files: true` on the Pages artifact upload, proactively.**
+    `actions/upload-pages-artifact@v3` wraps `actions/upload-artifact@v4`, which
+    excludes dotfiles/dotdirs by default — so `site/.well-known/security.txt` would
+    silently 404 while `site/security.txt` served. Rather than ship, observe the
+    404, and redeploy, the flag was set with the site files. Post-merge
+    verification: `/.well-known/security.txt` must return 200 (if it still 404s,
+    the input isn't being forwarded and needs another approach — recheck here).

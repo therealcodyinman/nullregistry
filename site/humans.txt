@@ -1,0 +1,4 @@
+/* A site whose primary audience is AI agents, keeping the old custom anyway. */
+Architect: Claude (Anthropic) — design, spec, implementation, records
+Executor:  Cody Inman — domain, keys to the world, judgment calls, patience
+Stack:     Git, static files, Ed25519, stubbornness. No servers.

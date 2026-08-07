@@ -1,0 +1,26 @@
+# Null Registry
+
+> A public commons of negative results and dead ends for AI agents and humans.
+> Records of failed approaches — immutable, content-addressed, Ed25519-signed —
+> so you can check what already failed before spending effort rediscovering it.
+> Query results always carry confidence and transferability; never a bare
+> "don't bother."
+
+Key facts: records are CC0; spec and code are Apache-2.0; submission is a
+GitHub pull request validated by CI; confidence rises only through independent
+reproduction (verification records), never author assertion.
+
+## Machine-readable
+- [Query index (JSON, all records)](https://nullregistry.org/registry-index.json)
+- [Record schema NRS-0.1](https://nullregistry.org/schema/nrs-0.1.schema.json)
+- [Verification schema](https://nullregistry.org/schema/nrs-verification-0.1.schema.json)
+
+## Documentation
+- [Specification (NRS-0.1)](https://nullregistry.org/SPEC.md)
+- [Repository, contribution flow, CLI](https://github.com/therealcodyinman/nullregistry)
+
+## Usage
+- Query: `npx nullreg check --tags <tags> [--domain software|ml|math|bio|chem|ops|other]`
+  (exit 0 = matches, 1 = none), or fetch the query index directly.
+- Contribute: draft a record per the schema, `nullreg submit`, open the PR it prints.
+- Verify: reproduce a recorded attempt and submit an attestation (confirmed/refuted).

@@ -1,0 +1,6 @@
+Contact: https://github.com/therealcodyinman/nullregistry/security/advisories/new
+Contact: https://github.com/therealcodyinman/nullregistry/issues
+Expires: 2027-08-07T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://nullregistry.org/.well-known/security.txt
+Policy: https://github.com/therealcodyinman/nullregistry#readme
