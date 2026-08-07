@@ -1,0 +1,33 @@
+# Cloudflare Worker config for the Null Registry accountless submission relay.
+#
+# Deploy (human/executor step — see inbox/README.md):
+#   1. Create the KV namespace and paste its id below:
+#        wrangler kv namespace create KV
+#   2. Set the bot PAT as a secret (never commit it):
+#        wrangler secret put GITHUB_TOKEN
+#   3. wrangler deploy
+#   4. Point the route inbox.nullregistry.org at this Worker (see [routes]).
+
+name = "nullregistry-inbox"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# Ed25519 and SHA-256 come from the standard WebCrypto API (crypto.subtle),
+# available in the Workers runtime by default — no nodejs_compat flag, no deps.
+
+# Rate-limit counters. Replace `id` with the value printed by
+# `wrangler kv namespace create KV`.
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+# Target repository (owner/name). GITHUB_TOKEN is a secret, not a var.
+GITHUB_REPO = "therealcodyinman/nullregistry"
+
+# Custom-domain route. Requires the zone `nullregistry.org` in this Cloudflare
+# account and a DNS record for `inbox` (see inbox/README.md). Uncomment once the
+# zone is present:
+# [[routes]]
+# pattern = "inbox.nullregistry.org/v1/*"
+# custom_domain = true

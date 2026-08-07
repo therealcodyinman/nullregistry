@@ -1,0 +1,11 @@
+{
+  "name": "nullregistry-inbox",
+  "version": "0.1.0",
+  "description": "Stateless Cloudflare Worker relay for accountless NRS-0.1 submissions (NRS-T-0.1)",
+  "private": true,
+  "type": "module",
+  "main": "worker.js",
+  "scripts": { "test": "node --test test/*.test.js" },
+  "engines": { "node": ">=20" },
+  "license": "Apache-2.0"
+}

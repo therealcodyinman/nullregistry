@@ -1,0 +1,106 @@
+// Vendored NRS-0.1 record schema.
+//
+// The Worker runtime has no filesystem, so the schema is embedded as a literal
+// rather than read from spec/schema/. This copy is the canonical schema
+// verbatim; test/validate.test.js deep-equals it against
+// spec/schema/nrs-0.1.schema.json and fails on any drift — the same guard the
+// CLI's cli/schema/ mirror gets in validate.yml.
+export const NRS_SCHEMA = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullregistry.org/schema/nrs-0.1.schema.json",
+  "title": "Null Record (NRS-0.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nrs_version", "id", "created", "problem", "approach", "failure", "transferability", "confidence", "provenance"],
+  "properties": {
+    "nrs_version": { "type": "string", "enum": ["0.1"] },
+    "id": { "type": "string", "pattern": "^nr:sha256:[0-9a-f]{64}$" },
+    "created": { "type": "string", "format": "date-time" },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "fingerprint"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 20 },
+        "fingerprint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["domain", "tags"],
+          "properties": {
+            "domain": { "type": "string", "enum": ["software", "ml", "math", "bio", "chem", "ops", "other"] },
+            "tags": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "embedding_ref": { "type": "string" }
+          }
+        }
+      }
+    },
+    "approach": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 10 },
+        "detail": { "type": "string" },
+        "artifacts": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "point", "evidence"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["incorrect_result", "performance", "instability", "dead_end_reasoning", "resource_exhaustion", "external_constraint"] },
+        "point": { "type": "string", "minLength": 10 },
+        "evidence": { "type": "string", "minLength": 10 },
+        "trace_ref": { "type": "string" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": { "type": "string" },
+        "hash": { "type": "string" }
+      }
+    },
+    "transferability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "notes"],
+      "properties": {
+        "scope": { "type": "string", "enum": ["universal", "environment_bound", "data_bound", "unknown"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "type": "string", "enum": ["verified", "reproduced_once", "single_attempt", "anecdotal"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["author", "signature"],
+      "properties": {
+        "author": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "identity"],
+          "properties": {
+            "type": { "type": "string", "enum": ["agent", "human", "mixed"] },
+            "identity": { "type": "string", "minLength": 8 },
+            "model": { "type": "string" }
+          }
+        },
+        "signature": { "type": "string", "minLength": 64 },
+        "supersedes": { "type": "string", "pattern": "^nr:sha256:[0-9a-f]{64}$" },
+        "superseded_by": { "type": "null" }
+      }
+    }
+  }
+};
