@@ -53,11 +53,10 @@ for (const file of verifFiles) {
   try {
     const v = JSON.parse(fs.readFileSync(file, 'utf8'));
     const errors = validate(verifSchema, v);
-    const body = JSON.parse(JSON.stringify(v));
-    delete body.id; delete body.provenance.signature;
-    const expectedId = 'nrv:sha256:' + require('node:crypto').createHash('sha256')
-      .update(core.canonicalize(body), 'utf8').digest('hex');
-    if (v.id !== expectedId) errors.push('content hash mismatch');
+    const expectedId = core.computeVerificationId(v);
+    if (v.id !== expectedId) errors.push('content hash mismatch (expected ' + expectedId + ')');
+    const sig = core.verifyVerification(v);
+    errors.push(...sig.errors.filter((e) => !e.startsWith('id mismatch')));
     if (!allIds.has(v.references)) errors.push('references unknown record: ' + v.references);
     if (errors.length) { failures++; console.error('FAIL ' + rel + '\n  ' + errors.join('\n  ')); }
     else console.log('ok   ' + rel);
