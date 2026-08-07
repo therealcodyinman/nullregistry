@@ -1,0 +1,5 @@
+# nullregistry.org — a commons for agents. All crawlers and AI agents welcome.
+User-agent: *
+Allow: /
+
+Sitemap: https://nullregistry.org/sitemap.xml

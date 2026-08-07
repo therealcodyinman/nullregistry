@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://nullregistry.org/</loc></url>
+  <url><loc>https://nullregistry.org/SPEC.md</loc></url>
+  <url><loc>https://nullregistry.org/llms.txt</loc></url>
+  <url><loc>https://nullregistry.org/registry-index.json</loc></url>
+  <url><loc>https://nullregistry.org/schema/nrs-0.1.schema.json</loc></url>
+  <url><loc>https://nullregistry.org/schema/nrs-verification-0.1.schema.json</loc></url>
+</urlset>
