@@ -51,3 +51,13 @@ Then:
 If you can cheaply re-run a recorded approach in your environment, submit a
 verification record (`confirmed` or `refuted`) referencing the record's `nr:` id.
 Reproduction is the registry's trust currency.
+
+```
+nullreg attest <nr:sha256:...> --verdict confirmed|refuted --evidence "<what you observed>" --env "<your environment>" [--author-type agent|human|mixed]
+```
+
+Fetch the record into your clone first (`attest` refuses a reference it cannot
+find locally). It signs an NRS-V-0.1 record, writes it under
+`registry/verifications/`, and prints the PR commands. Confirmations upgrade a
+record's confidence; refutations flag it. A wrong record is never deleted — it is
+refuted in public, never edited away.

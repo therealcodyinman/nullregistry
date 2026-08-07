@@ -53,3 +53,63 @@ where execution diverged from the original plan. Architect: Claude. Executor: Co
 11. **`nullreg submit` prints the PR commands instead of opening the PR**, per the
     handoff constraint. Auto-PR is a v1.1 candidate once abuse surface is thought
     through.
+
+---
+
+## v1.1 (post-launch hardening)
+
+Architect: Claude. Executor: Cody. Continuing the numbering.
+
+12. **Cloned origin into an empty working directory.** The v1.1 handoff assumed a
+    local clone, but the working directory was empty and not a git repo. The
+    remote `main` matched the described v1 exactly (spec, CLI, 10 seeds, CI), so
+    the correct action was to clone it into place and branch `v1.1` — not to treat
+    the handoff's premises as false.
+
+13. **`nrv:` construction reuses the null-record canonical body verbatim; only the
+    prefix differs.** Extended `cli/lib/core.js` with `hashCanonicalBody`,
+    `computeVerificationId`, and `verifyVerification`; verification signing reuses
+    `signRecord`/`canonicalBody` unchanged. `validate-all.js` was refactored to
+    call `core.computeVerificationId` instead of re-deriving the hash inline —
+    extend core, don't duplicate, per the handoff.
+
+14. **`validate-all.js` now enforces the verification signature.** Previously it
+    checked a verification's schema, content-hash, and reference existence but not
+    its Ed25519 signature. The spec's trust model states every record is signed, so
+    signature verification (via `core.verifyVerification`) is now enforced. Strictly
+    stronger; every verification `attest` produces signs correctly.
+
+15. **`attest` refuses an absent reference and a missing identity.** It exits 1 if
+    the referenced `nr:` record is not present under `registry/records/` in
+    `--repo` (fetching the record is the human's job, per the handoff), and exits 2
+    with guidance if no `~/.nullreg` identity exists (run `keygen` first).
+
+16. **`attest` author defaults and timestamp.** `author.type` defaults to `agent`
+    (`--author-type` overrides to `human`/`mixed`); `author.model` is omitted (a
+    verifier's model isn't meaningful for a reproduction claim and the field is
+    optional). `created` strips milliseconds from `toISOString()` to match the seed
+    timestamp style; the schema/validator accept both forms.
+
+17. **`attest` tests are end-to-end, spawning the CLI.** To exercise the local-file
+    refusal and "schema validity of produced files" faithfully, the tests spawn
+    `nullreg attest` against a temp repo with a temp `HOME` (redirecting `keygen`),
+    plus a fast in-core id/signature round-trip and tamper test. They live in
+    `cli/test/attest.test.js`, so the existing `cli/test/*.test.js` CI glob runs
+    them with no workflow change.
+
+18. **Batch-2 seed guard is count-based, not content-based.** Each run mints a fresh
+    single-use identity, which is part of the canonical body, so content-addressed
+    ids differ every run — file-existence cannot make the batch idempotent (an
+    early content-based guard produced 20 duplicates before this was caught).
+    `seed-batch2.js` instead refuses unless exactly the 10 founding seeds are
+    present, the only state in which appending the batch is correct.
+
+19. **Batch-2 `created` is a uniform constant** (`2026-08-07T16:00:00Z`), same
+    rationale as #8 — it records authoring/build time. Confidence policy: only
+    deterministic, source-documented behavior is `reproduced_once`; statistical or
+    principle-level failures (test-set reuse, the "network is reliable" fallacy) are
+    `single_attempt`. No batch-2 record claims `verified`. Domain spread of the 20:
+    10 software, 4 ml, 3 ops, 3 math (10 non-software).
+
+20. **`attest` prints the PR commands only**, never opens the PR — mirrors #11 and
+    keeps the human in the loop for the one network-facing step.
