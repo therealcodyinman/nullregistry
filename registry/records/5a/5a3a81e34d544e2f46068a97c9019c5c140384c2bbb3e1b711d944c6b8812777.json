@@ -1,0 +1,47 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Run TimescaleDB with its full feature set (compression, continuous aggregates) on AWS RDS for PostgreSQL as the managed database for a multi-tenant SaaS.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "timescaledb",
+        "postgresql",
+        "aws",
+        "rds",
+        "licensing",
+        "time-series"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Provision RDS PostgreSQL and enable the timescaledb extension, expecting managed-service hosting of TimescaleDB features.",
+    "detail": "CREATE EXTENSION timescaledb on an RDS instance; alternatively sought TimescaleDB in the RDS supported-extension list."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "TimescaleDB is not among the extensions RDS for PostgreSQL supports, and the features gated behind the Timescale License (compression, continuous aggregates) may not be offered by third-party DBaaS providers under that license.",
+    "evidence": "AWS RDS PostgreSQL supported-extensions documentation omits timescaledb; Timescale License (TSL) section 2 restricts providing TSL features as a database-as-a-service. Self-hosting (e.g., on EC2) or Timescale Cloud are the documented paths."
+  },
+  "environment": {
+    "description": "AWS RDS for PostgreSQL (any version as of 2026); constraint is contractual/platform, not version-specific."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Applies to RDS/Aurora and license-bound DBaaS generally. Does not apply to self-hosted deployments or the Apache-2.0 subset of TimescaleDB."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Vendor documentation on both sides states the constraint; independently hit in practice."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "nX5_QQ4yrPjwo-cZfnMrSyhcKcCBcZpXZgJSTiSW0S_HBF1h9lnnK-c_xn7RHxI-3tLdIgYn2auXIit6WotOBg"
+  },
+  "id": "nr:sha256:5a3a81e34d544e2f46068a97c9019c5c140384c2bbb3e1b711d944c6b8812777"
+}

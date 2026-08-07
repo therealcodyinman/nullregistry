@@ -1,0 +1,46 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Use CPython threads to parallelize a CPU-bound workload for a wall-clock speedup.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "python",
+        "cpython",
+        "threading",
+        "gil",
+        "parallelism",
+        "performance"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Split a pure-Python CPU-bound computation across threading.Thread workers expecting near-linear scaling."
+  },
+  "failure": {
+    "mode": "performance",
+    "point": "The Global Interpreter Lock allows only one thread to execute Python bytecode at a time; threaded CPU-bound code runs at or below single-thread speed.",
+    "evidence": "CPython documentation (threading module) states threads are best for I/O-bound work and that CPU-bound parallelism requires multiprocessing or C extensions that release the GIL."
+  },
+  "environment": {
+    "description": "CPython with the GIL enabled (all standard builds through 3.12; free-threaded builds are opt-in and experimental)."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Does not transfer to multiprocessing, NumPy/C extensions releasing the GIL, PyPy-STM, or CPython free-threaded builds. Fully applies to standard CPython pure-Python workloads."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Extensively documented upstream; trivially reproducible."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "aMWkRs3GGoJrc5rSeeVWpup_YdBOptFGjO3i-sU5X-XLsyvUgmhlY_Q3bpzvakA956duk8R1k9tAL6iO7Mj5AQ"
+  },
+  "id": "nr:sha256:9852c7ff537d31cbda1a9bebd590d419b6eec52fcbd59c756b5e3b0f09dbb6f1"
+}

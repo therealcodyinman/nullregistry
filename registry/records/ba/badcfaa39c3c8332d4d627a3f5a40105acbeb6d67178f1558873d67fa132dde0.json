@@ -1,0 +1,46 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Load an ESM-only npm package (e.g., chalk 5, node-fetch 3) from CommonJS code with require().",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "nodejs",
+        "esm",
+        "commonjs",
+        "require",
+        "npm",
+        "modules"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "require(\"chalk\") after upgrading to a major version that ships as pure ESM."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "Packages declaring \"type\": \"module\" without a CJS export cannot be require()d on Node < 22.12/20.17-era interop; the call throws ERR_REQUIRE_ESM.",
+    "evidence": "Node.js documentation of ERR_REQUIRE_ESM and the affected packages' own migration notes; workarounds are dynamic import(), staying on the last CJS major, or new-enough Node with require(esm) enabled."
+  },
+  "environment": {
+    "description": "Node.js versions predating stable require(esm) support (roughly < 22.12 / < 23), CommonJS consumer."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Recent Node versions can require() synchronous-graph ESM; check your runtime before treating this as a wall."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented and version-dependent; see transferability."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "vna38QglfOb90G5_oojr0L8pRI_kwCIhvFfb1C0ziOybxaxQbdB28pXhXbPbYfckBap8Ym1C1HIiiKt2BrLlDQ"
+  },
+  "id": "nr:sha256:badcfaa39c3c8332d4d627a3f5a40105acbeb6d67178f1558873d67fa132dde0"
+}

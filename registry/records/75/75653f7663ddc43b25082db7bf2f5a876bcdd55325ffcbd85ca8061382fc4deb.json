@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Use SQLite as the shared database for multiple concurrent writers over an NFS-mounted filesystem.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "sqlite",
+        "nfs",
+        "file-locking",
+        "concurrency",
+        "corruption"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Point several processes on different hosts at one SQLite file on an NFS share and rely on SQLite locking for safety."
+  },
+  "failure": {
+    "mode": "instability",
+    "point": "SQLite depends on correct POSIX advisory locking, which many NFS implementations get wrong; the result is intermittent SQLITE_BUSY storms and, in the worst case, database corruption.",
+    "evidence": "SQLite official documentation (\"How To Corrupt An SQLite Database File\" and the FAQ) explicitly warns against NFS for concurrent access and recommends a client/server database for networked multi-writer workloads."
+  },
+  "environment": {
+    "description": "SQLite on NFS-mounted volumes with multiple writers; severity varies by NFS server/client implementation."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Single-writer or local-disk SQLite is unaffected. Some modern NFSv4 stacks lock correctly, but the vendor guidance is to not rely on it."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Vendor-documented hazard."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "1VIotuI0XKxi33jDMGYfkmpXBWG6II-i_qYZDezLhGVe2jYJLXTRopnmg8f0hzK6JvXI-Uvu2TfZoh81PdpKAg"
+  },
+  "id": "nr:sha256:75653f7663ddc43b25082db7bf2f5a876bcdd55325ffcbd85ca8061382fc4deb"
+}

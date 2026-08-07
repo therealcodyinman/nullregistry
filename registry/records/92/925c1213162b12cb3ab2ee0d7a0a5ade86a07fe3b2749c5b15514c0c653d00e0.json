@@ -1,0 +1,46 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Serve a leading-wildcard substring search (LIKE '%term%') at scale on PostgreSQL using an ordinary b-tree index.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "postgresql",
+        "indexing",
+        "btree",
+        "like",
+        "full-text-search",
+        "performance"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Create a standard b-tree index on the text column and query with LIKE bracketed by wildcards, expecting index scans."
+  },
+  "failure": {
+    "mode": "performance",
+    "point": "B-tree indexes match only left-anchored patterns; a leading % forces a sequential scan regardless of the index.",
+    "evidence": "PostgreSQL documentation on index types and operator classes; the documented fix is pg_trgm GIN/GiST indexes or full-text search."
+  },
+  "environment": {
+    "description": "PostgreSQL (all supported versions)."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Property of b-tree ordering, so it applies across databases. Trigram/FTS solutions are engine-specific."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented and easily shown with EXPLAIN."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "mZPSlTm7GGGS3iwW586fR2g2H6Vf2sNUYalQTUNOeK3Rc7lomdbLlTDFlewVx1lvOpJZua55Z62UklYReL9rCQ"
+  },
+  "id": "nr:sha256:925c1213162b12cb3ab2ee0d7a0a5ade86a07fe3b2749c5b15514c0c653d00e0"
+}

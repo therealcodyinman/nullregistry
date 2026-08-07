@@ -1,0 +1,46 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Persist state from a sandboxed third-party iframe embed using localStorage.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "browser",
+        "iframe",
+        "sandbox",
+        "localstorage",
+        "embed",
+        "storage-partitioning"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Call window.localStorage inside an iframe sandboxed without allow-same-origin, or rely on third-party iframe storage surviving across sites."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "A sandboxed frame without allow-same-origin has an opaque origin, so localStorage access throws SecurityError; even with access, modern browsers partition third-party storage per top-level site, so state does not carry across embedding sites.",
+    "evidence": "HTML specification on sandboxing and opaque origins; MDN Web Storage documentation; browser storage-partitioning rollouts documented by Chrome, Firefox, and Safari (ITP)."
+  },
+  "environment": {
+    "description": "Current evergreen browsers embedding cross-origin or sandboxed iframes."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "First-party same-origin frames are unaffected. Server-side state or postMessage to the host page are the standard routes for embeds."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Spec-defined behavior plus documented browser policy."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "cGcPcN_1-ck4MmFc9QtUaaVHq66zJ9FFXAUb0i6wr94YQwj86ZWFBLEsqQIIZoT8jYjCKTaVBq08-CTjpl2jDA"
+  },
+  "id": "nr:sha256:ad555328604a28d42f191742186c90a7b357488378dfcd6189e09db142171f60"
+}

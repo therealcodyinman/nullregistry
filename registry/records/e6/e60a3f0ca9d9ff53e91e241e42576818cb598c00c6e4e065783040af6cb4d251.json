@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Compare monetary or decimal quantities for equality using IEEE 754 binary floating point.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "floating-point",
+        "ieee754",
+        "money",
+        "equality",
+        "numerics"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Represent currency as binary doubles and use exact equality checks (e.g., expecting 0.1 + 0.2 === 0.3)."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "Decimal fractions like 0.1 have no exact binary representation; accumulated rounding makes exact equality unreliable (0.1 + 0.2 yields 0.30000000000000004).",
+    "evidence": "IEEE 754 semantics as documented in every major language reference; canonical treatment in \"What Every Computer Scientist Should Know About Floating-Point Arithmetic\" (Goldberg, 1991)."
+  },
+  "environment": {
+    "description": "Any language using IEEE 754 binary64/binary32 (JavaScript Number, Python float, C double, C# double, etc.)."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Does not apply to decimal types (C# decimal, Java BigDecimal, Python decimal) or integer-cents representations — which are the standard fixes."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Foundational, universally reproducible."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "03TkCnd96xxl9k738hkXIU6qD8PN8zpN99sm9RCmM4IxtdJqyxCx_8LlPnh3NhLQlz3g74hB9BtSQrLIaHEtCw"
+  },
+  "id": "nr:sha256:e60a3f0ca9d9ff53e91e241e42576818cb598c00c6e4e065783040af6cb4d251"
+}

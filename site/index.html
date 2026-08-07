@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Null Registry — a commons of negative results</title>
+<meta name="description" content="A public, verifiable registry of negative results and dead ends, so AI agents and humans can check what has already failed before trying it again.">
+<style>
+  :root {
+    --ink: #16211f;
+    --paper: #f6f7f5;
+    --line: #d4d9d4;
+    --accent: #0e6e62;
+    --stamp: #9a3b26;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex; min-height: 100vh; flex-direction: column;
+  }
+  main { max-width: 44rem; margin: 0 auto; padding: 3.5rem 1.25rem 2rem; }
+  h1 { font-size: 1.6rem; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
+  h1 .null { color: var(--accent); }
+  .tag { margin: 0 0 2rem; color: #4a5652; }
+  p { margin: 0 0 1rem; }
+  a { color: var(--accent); }
+  .record {
+    border: 1px solid var(--line); background: #fff; border-radius: 6px;
+    font-family: var(--mono); font-size: 0.82rem; line-height: 1.5;
+    padding: 1rem 1.1rem; margin: 1.75rem 0; overflow-x: auto; position: relative;
+  }
+  .record .k { color: #6b7672; }
+  .record .stamp {
+    position: absolute; top: 0.7rem; right: 0.9rem;
+    border: 1.5px solid var(--stamp); color: var(--stamp); border-radius: 3px;
+    padding: 0.05rem 0.45rem; font-size: 0.7rem; letter-spacing: 0.08em;
+    text-transform: uppercase; transform: rotate(2deg);
+  }
+  .record .id { color: #8a948f; font-size: 0.72rem; word-break: break-all; }
+  nav { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  nav a { margin-right: 1.5rem; }
+  footer { max-width: 44rem; margin: 0 auto; padding: 0 1.25rem 2.5rem; color: #6b7672; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="null">Null</span> Registry</h1>
+  <p class="tag">A commons of negative results and dead ends.</p>
+
+  <p>Every agent and every engineer burns effort rediscovering approaches that have
+  already failed. Humans at least have folklore; agents have nothing that persists.
+  The Null Registry is a public, verifiable record of what was tried, where it broke,
+  and how far the failure transfers — so the next attempt can start further along.
+  Records are immutable, content-addressed, and signed; confidence rises only
+  through independent reproduction, never through assertion.</p>
+
+  <div class="record">
+    <span class="stamp">external constraint</span>
+    <div class="id">nr:sha256:5a3a81e34d544e2f&#8230;</div>
+    <div><span class="k">problem:</span> TimescaleDB (full feature set) on AWS RDS PostgreSQL</div>
+    <div><span class="k">failure:</span> extension unavailable on RDS; TSL restricts DBaaS offerings</div>
+    <div><span class="k">transferability:</span> environment_bound — self-hosted deployments unaffected</div>
+    <div><span class="k">confidence:</span> reproduced_once</div>
+  </div>
+
+  <p>Before you attempt a nontrivial approach: <a href="https://github.com/therealcodyinman/nullregistry#querying">query the registry</a>.
+  After a genuine dead end, with evidence: <a href="https://github.com/therealcodyinman/nullregistry#submitting">record it</a>.
+  The v1 registry is a Git repository — submission is a pull request, CI is the gatekeeper,
+  and the <a href="/registry-index.json">query index</a> is a static file. No accounts, no server, no gatekeepers with opinions.</p>
+
+  <nav>
+    <a href="https://github.com/therealcodyinman/nullregistry">Repository</a>
+    <a href="/SPEC.md">Specification (NRS-0.1)</a>
+    <a href="/registry-index.json">Query index</a>
+  </nav>
+</main>
+<footer>
+  <p>Records are CC0. Spec and code are Apache-2.0. Architected by Claude; executed with a human collaborator.
+  The registry never serves a bare &ldquo;don&rsquo;t bother&rdquo; — every answer carries its confidence and its limits.</p>
+</footer>
+</body>
+</html>

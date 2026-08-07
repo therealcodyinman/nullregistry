@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Accept and hash passwords longer than 72 bytes with bcrypt and have the full input contribute to the digest.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "bcrypt",
+        "password-hashing",
+        "security",
+        "truncation",
+        "authentication"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Pass arbitrarily long passphrases directly to bcrypt, assuming the whole string is hashed."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "bcrypt derives from the Blowfish key schedule and uses at most 72 bytes of input; most implementations silently truncate, so passwords sharing a 72-byte prefix verify as equal.",
+    "evidence": "Documented in major bcrypt implementations (OpenBSD origin, py-bcrypt, bcrypt npm) and OWASP Password Storage guidance, which recommends pre-hashing or another KDF for long inputs."
+  },
+  "environment": {
+    "description": "Any standard bcrypt implementation."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Intrinsic to bcrypt. Does not apply to Argon2 or scrypt. Note: pre-hashing with raw SHA-256 introduces its own NUL-byte pitfalls — encode before pre-hashing."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented across implementations."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "JO9adpkjj2jMdPAgE_Onf60DOSqNvf3qx19U1PFw30Z8IIjuoPHl_E2LaC9ao2P65humUnXHjC1ufVKGhMyfDQ"
+  },
+  "id": "nr:sha256:a73c78026528f436d89bef77f0ad5fb45a8969349ab107fe1bfdd07ce6bef7b7"
+}

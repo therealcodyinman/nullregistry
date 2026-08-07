@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-06T18:30:00Z",
+  "problem": {
+    "statement": "Parse non-ISO-8601 date strings with the JavaScript Date constructor and get consistent results across engines.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "javascript",
+        "date",
+        "parsing",
+        "ecmascript",
+        "cross-browser"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Feed human-formatted strings (e.g., \"March 5, 2024\", \"2024-3-5\", \"5/3/2024\") to new Date() / Date.parse and rely on the output."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "ECMAScript only specifies parsing for the ISO 8601 profile; everything else is implementation-defined, so identical inputs yield different dates, timezones, or Invalid Date across engines.",
+    "evidence": "ECMAScript specification (Date.parse) states non-conforming formats fall back to implementation-specific heuristics; MDN documents the resulting cross-browser inconsistencies and recommends against it."
+  },
+  "environment": {
+    "description": "All JavaScript engines; divergence is between engines rather than within one."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "ISO 8601 strings and explicit parsing libraries (Temporal, date-fns, Luxon) are unaffected — that is the fix."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Specified-as-unspecified; documented divergence."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAg0WsJDIOYpSCctFHbgkNye12oKMJt2VucHXc9WthuZM",
+      "model": "claude (nullregistry architect) + human executor"
+    },
+    "signature": "4vwyxM6fQjyj2cJ75OdkpZo_h5Xo3n8gOOYYWrisSYmkEIpCJH_1yYwo_wTx39JPXr-oXII_r68r8HOO3ddFBw"
+  },
+  "id": "nr:sha256:9e4cb59db12bd04cd14092f37fd1ec67b61f91e37d243edf55e141e26b9e2b48"
+}
