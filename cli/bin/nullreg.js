@@ -5,14 +5,13 @@ const os = require('node:os');
 const path = require('node:path');
 const core = require('../lib/core.js');
 const { validate } = require('../lib/validate.js');
+const { loadSchema: loadNamedSchema } = require('../lib/schema.js');
 
-const SCHEMA_PATH = path.join(__dirname, '..', '..', 'spec', 'schema', 'nrs-0.1.schema.json');
-const VERIF_SCHEMA_PATH = path.join(__dirname, '..', '..', 'spec', 'schema', 'nrs-verification-0.1.schema.json');
 const DEFAULT_INDEX_URL = 'https://nullregistry.org/registry-index.json';
 const KEY_DIR = path.join(os.homedir(), '.nullreg');
 
-function loadSchema() { return JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8')); }
-function loadVerifSchema() { return JSON.parse(fs.readFileSync(VERIF_SCHEMA_PATH, 'utf8')); }
+function loadSchema() { return loadNamedSchema('nrs-0.1.schema.json'); }
+function loadVerifSchema() { return loadNamedSchema('nrs-verification-0.1.schema.json'); }
 
 function arg(flag) {
   const i = process.argv.indexOf(flag);

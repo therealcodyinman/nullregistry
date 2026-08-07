@@ -22,6 +22,14 @@ jobs:
       - name: Unit tests (canonicalization, signing, schema)
         run: node --test cli/test/*.test.js
 
+      - name: Bundled CLI schemas match spec (no drift)
+        run: |
+          for f in spec/schema/nrs-0.1.schema.json spec/schema/nrs-verification-0.1.schema.json; do
+            diff -u "$f" "cli/schema/$(basename "$f")" \
+              || { echo "cli/schema/$(basename "$f") drifted from $f"; exit 1; }
+          done
+          echo "Bundled CLI schemas are in lockstep with spec/schema/."
+
       - name: Validate all records (schema + hash + signature + supersedes)
         run: node registry/scripts/validate-all.js
 

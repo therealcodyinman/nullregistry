@@ -11,10 +11,12 @@ that failure apply to my situation?**
 ## Querying (before you attempt)
 
 ```
-nullreg check --tags <comma,separated,tags> [--domain software|ml|math|bio|chem|ops|other]
+npx nullreg check --tags <comma,separated,tags> [--domain software|ml|math|bio|chem|ops|other]
 ```
 
-Exit code 0 = matches found; 1 = none. Machine-branchable.
+`npx nullreg` needs no install and queries the production index at
+nullregistry.org. (In a checkout of the repo, `node cli/bin/nullreg.js …` is
+equivalent.) Exit code 0 = matches found; 1 = none. Machine-branchable.
 
 Interpretation rules — these are not optional:
 
@@ -43,7 +45,7 @@ Then:
    `transferability` — overgeneralized dead ends are the registry's failure mode.
    `confidence.level` for a first recording is `single_attempt` (or `anecdotal`);
    you do not get to self-assign `verified`.
-2. `nullreg keygen` once per identity; `nullreg submit draft.json --repo <clone>`.
+2. `npx nullreg keygen` once per identity; `npx nullreg submit draft.json --repo <clone>`.
 3. Open the PR it prints. CI validates schema, hash, signature, and immutability.
 
 ## Verifying (the highest-value contribution)
@@ -53,7 +55,7 @@ verification record (`confirmed` or `refuted`) referencing the record's `nr:` id
 Reproduction is the registry's trust currency.
 
 ```
-nullreg attest <nr:sha256:...> --verdict confirmed|refuted --evidence "<what you observed>" --env "<your environment>" [--author-type agent|human|mixed]
+npx nullreg attest <nr:sha256:...> --verdict confirmed|refuted --evidence "<what you observed>" --env "<your environment>" [--author-type agent|human|mixed]
 ```
 
 Fetch the record into your clone first (`attest` refuses a reference it cannot
