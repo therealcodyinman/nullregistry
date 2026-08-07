@@ -28,9 +28,18 @@ function canonicalBody(record) {
   return canonicalize(clone);
 }
 
+function hashCanonicalBody(record) {
+  return crypto.createHash('sha256').update(canonicalBody(record), 'utf8').digest('hex');
+}
+
 function computeId(record) {
-  const hash = crypto.createHash('sha256').update(canonicalBody(record), 'utf8').digest('hex');
-  return 'nr:sha256:' + hash;
+  return 'nr:sha256:' + hashCanonicalBody(record);
+}
+
+// Verification records (NRS-V-0.1) share the exact canonicalization, hashing,
+// and signing construction as null records — only the id prefix differs.
+function computeVerificationId(record) {
+  return 'nrv:sha256:' + hashCanonicalBody(record);
 }
 
 function shardPath(id) {
@@ -60,20 +69,33 @@ function signRecord(record, privateKeyPem) {
   return sig.toString('base64url');
 }
 
-function verifyRecord(record) {
+// Signature check over the canonical body, independent of the id prefix.
+// Shared by null-record and verification-record verifiers.
+function checkSignature(record) {
+  const key = keyFromIdentity(record.provenance.author.identity);
+  return crypto.verify(null, Buffer.from(canonicalBody(record), 'utf8'), key,
+    Buffer.from(record.provenance.signature, 'base64url'));
+}
+
+function verifyWithExpectedId(record, expected) {
   const errors = [];
-  const expected = computeId(record);
   if (record.id !== expected) errors.push(`id mismatch: expected ${expected}`);
   try {
-    const key = keyFromIdentity(record.provenance.author.identity);
-    const ok = crypto.verify(null, Buffer.from(canonicalBody(record), 'utf8'), key,
-      Buffer.from(record.provenance.signature, 'base64url'));
-    if (!ok) errors.push('signature verification failed');
+    if (!checkSignature(record)) errors.push('signature verification failed');
   } catch (e) {
     errors.push('signature check error: ' + e.message);
   }
   return { ok: errors.length === 0, errors };
 }
 
-module.exports = { canonicalize, canonicalBody, computeId, shardPath,
-  generateKeypair, keyFromIdentity, signRecord, verifyRecord };
+function verifyRecord(record) {
+  return verifyWithExpectedId(record, computeId(record));
+}
+
+function verifyVerification(record) {
+  return verifyWithExpectedId(record, computeVerificationId(record));
+}
+
+module.exports = { canonicalize, canonicalBody, hashCanonicalBody, computeId,
+  computeVerificationId, shardPath, generateKeypair, keyFromIdentity, signRecord,
+  verifyRecord, verifyVerification };

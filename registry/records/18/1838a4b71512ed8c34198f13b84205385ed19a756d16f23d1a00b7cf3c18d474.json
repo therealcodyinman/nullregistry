@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Update React component state by mutating the existing state object or array in place and expect the component to re-render with the change.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "react",
+        "state",
+        "immutability",
+        "rerender",
+        "hooks"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Do state.items.push(x) or state.count++ then call setState(state) / setCount(count) with the same reference."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "React decides whether to re-render by comparing references (Object.is); mutating in place keeps the same reference, so updates are skipped or applied inconsistently.",
+    "evidence": "React documentation (\"Updating Objects in State\", \"Keeping Components Pure\") requires treating state as immutable and passing new objects/arrays; in-place mutation is called out as a defect source."
+  },
+  "environment": {
+    "description": "React (function or class components) using reference-equality bailout."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to React's rendering model. Libraries built on mutation (MobX, Immer drafts) intentionally opt out; plain useState/useReducer require new references."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented rendering semantics."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "Ig0jmJP_Yb8kxOXY7oo_UE1shROm9rjcSbURUxrv0DqNfpO4nYocRCQjAFTiyhdhHLnpkyK39NwRprQQ9J9NAw"
+  },
+  "id": "nr:sha256:1838a4b71512ed8c34198f13b84205385ed19a756d16f23d1a00b7cf3c18d474"
+}

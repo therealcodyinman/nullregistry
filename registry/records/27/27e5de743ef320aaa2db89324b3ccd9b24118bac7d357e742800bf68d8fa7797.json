@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Run inference or validation with a PyTorch model containing Dropout or BatchNorm without switching it out of training mode first.",
+    "fingerprint": {
+      "domain": "ml",
+      "tags": [
+        "machine-learning",
+        "pytorch",
+        "model-eval",
+        "dropout",
+        "batchnorm"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Call the model on validation/test inputs while it is still in train() mode (no model.eval())."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "In training mode Dropout randomly zeros activations and BatchNorm uses per-batch statistics rather than running estimates, so predictions become non-deterministic and inconsistent with deployment.",
+    "evidence": "PyTorch documentation (nn.Module.eval / train, Dropout, BatchNorm) states eval() disables dropout and switches BatchNorm to running statistics; it must be set before inference and train() restored for training."
+  },
+  "environment": {
+    "description": "PyTorch models containing training-mode-sensitive layers."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies only to models with mode-dependent layers (Dropout, BatchNorm, etc.); models without them are unaffected. torch.no_grad() is a separate concern also recommended for inference."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented layer behavior; reproducible as varying predictions on identical input."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "pY0IGA7U95Ym9G80F5mG4GWketwU0D6ERT4f5rcNkk0ZFjK-zcoWw97YPY7TjDSvVwMcFL_EvladzWG7adCRBw"
+  },
+  "id": "nr:sha256:27e5de743ef320aaa2db89324b3ccd9b24118bac7d357e742800bf68d8fa7797"
+}

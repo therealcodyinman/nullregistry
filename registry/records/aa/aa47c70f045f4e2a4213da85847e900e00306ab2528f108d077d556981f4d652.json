@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Assume that one application-level send over a TCP socket arrives as exactly one recv on the peer, preserving message boundaries.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "tcp",
+        "sockets",
+        "networking",
+        "framing",
+        "byte-stream"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Design a wire protocol that reads one logical message per recv() call, relying on send/recv to align with message boundaries."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "TCP is a byte stream with no message boundaries; a single send may be split across multiple recvs or coalesced with others, so a reader that assumes one-send-one-recv desynchronizes.",
+    "evidence": "Berkeley/POSIX sockets semantics and long-standing references (e.g., Beej's Guide to Network Programming) state TCP does not preserve message boundaries; explicit length-prefix or delimiter framing is required."
+  },
+  "environment": {
+    "description": "Any TCP implementation."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Message-oriented transports (UDP datagrams, SCTP, WebSocket frames) preserve boundaries and are unaffected; for TCP the fix is explicit framing."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Foundational, documented transport behavior."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "UB4c0jveig7Pg-pt8CdQiu69NcI13xsKFVTajDc9xPyxpXLrM21OyGo40V_Hm7xd3Klax8IG12IXPyh46dfWAA"
+  },
+  "id": "nr:sha256:aa47c70f045f4e2a4213da85847e900e00306ab2528f108d077d556981f4d652"
+}

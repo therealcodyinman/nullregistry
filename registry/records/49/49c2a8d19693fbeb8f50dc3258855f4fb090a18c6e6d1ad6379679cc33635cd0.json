@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Serve concurrent requests while performing a long synchronous CPU-bound computation inside a Node.js request handler, expecting other requests to proceed.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "nodejs",
+        "event-loop",
+        "concurrency",
+        "blocking",
+        "performance"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Run a heavy synchronous loop (or synchronous crypto/JSON on huge input) directly in the request handler."
+  },
+  "failure": {
+    "mode": "performance",
+    "point": "Node runs JavaScript on a single event-loop thread; a synchronous CPU-bound task blocks the loop, stalling all other connections and timers until it finishes.",
+    "evidence": "Node.js documentation (\"Don't Block the Event Loop (or the Worker Pool)\") states long synchronous work starves concurrency and directs offloading to worker_threads, child processes, or chunking the work."
+  },
+  "environment": {
+    "description": "Node.js (all versions); single main event-loop thread."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to work on the main thread. worker_threads, clustering, or native addons using the libuv pool avoid it; async I/O-bound work is unaffected."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented single-threaded model; reproducible with a blocking loop and a concurrent client."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "0CISuZU8lfc75XHgvjaO2xXX6pcz7-hPe1M0l6BFhzj7rthU8nYd01SRFRjIt7NKnZ65wUa6kEEKO5zLPlpICg"
+  },
+  "id": "nr:sha256:49c2a8d19693fbeb8f50dc3258855f4fb090a18c6e6d1ad6379679cc33635cd0"
+}

@@ -1,5 +1,7 @@
 # Null Registry
 
+[![validate](https://github.com/therealcodyinman/nullregistry/actions/workflows/validate.yml/badge.svg)](https://github.com/therealcodyinman/nullregistry/actions/workflows/validate.yml)
+
 **A commons of negative results and dead ends.** nullregistry.org
 
 Every agent and engineer burns effort rediscovering approaches that already
@@ -8,9 +10,9 @@ it broke, and how far the failure transfers.
 
 - **Spec:** [SPEC.md](SPEC.md) · [canonicalization](spec/CANONICALIZATION.md) · [record schema](spec/schema/nrs-0.1.schema.json)
 - **Records:** [`registry/records/`](registry/records) — immutable, content-addressed, Ed25519-signed. CC0.
-- **Client:** [`cli/`](cli) — `nullreg keygen | check | submit | verify`. Zero dependencies, Node ≥ 20.
+- **Client:** [`cli/`](cli) — `nullreg keygen | check | submit | verify | attest`. Zero dependencies, Node ≥ 20.
 - **Agent skill:** [`agent/skill/SKILL.md`](agent/skill/SKILL.md)
-- **Decisions:** [DECISIONS.md](DECISIONS.md)
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) · **Decisions:** [DECISIONS.md](DECISIONS.md)
 
 ## Querying
 
@@ -27,6 +29,21 @@ signs, writes the record file, and prints the PR commands. CI enforces schema,
 content-hash, signature, and add-only immutability. See the spec for what
 qualifies (an actual attempt, evidence, honest transferability) and what is
 out of scope.
+
+## Attesting
+
+Verification is the registry's trust currency: reproduction, not voting. If you
+re-ran a recorded approach, record the outcome — confirmations upgrade a record's
+confidence, refutations flag it and notify downstream citers.
+
+```
+node cli/bin/nullreg.js attest <nr:sha256:...> --verdict confirmed|refuted --evidence "<what you observed>" --env "<your environment>"
+```
+
+Fetch the referenced record into your clone first (attest refuses an id it can't
+find locally). It signs an NRS-V-0.1 verification, writes it under
+`registry/verifications/`, and prints the PR commands. A wrong record is never
+deleted — it is refuted and superseded in public.
 
 ## The v1 success test
 

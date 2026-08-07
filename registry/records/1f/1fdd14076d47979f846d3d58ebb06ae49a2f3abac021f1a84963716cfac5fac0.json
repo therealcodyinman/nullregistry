@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Get reproducible, pinned container deployments by referencing images with the :latest tag in build and deploy manifests.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "docker",
+        "containers",
+        "latest-tag",
+        "reproducibility",
+        "oci"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Reference FROM image:latest and deploy image:latest, expecting the same bits on every pull."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": ":latest is a mutable, non-versioned tag that points at whatever was pushed last; two pulls at different times can resolve to different images, so builds and rollbacks are not reproducible.",
+    "evidence": "Docker documentation notes latest is merely the default tag with no guarantee of being newest or stable; reproducibility guidance is to pin by immutable digest (image@sha256:...)."
+  },
+  "environment": {
+    "description": "Docker/OCI registries; any orchestrator that pulls by tag."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies to any mutable tag, not only latest. Pinning by digest (image@sha256:…) removes the problem entirely."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Registry tag mutability is documented and trivially observable."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "CgOkLymAF3FYlz06p5fCoWaY9e-0kDWkEB6hGH92fw4kyDZkCQ358fH3VAOB3ms4ha6dDUuZCxqAy8W5ycq7Dg"
+  },
+  "id": "nr:sha256:1fdd14076d47979f846d3d58ebb06ae49a2f3abac021f1a84963716cfac5fac0"
+}

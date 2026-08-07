@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Allow a browser to send credentialed cross-origin requests (cookies or Authorization headers) by responding with Access-Control-Allow-Origin: *.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "cors",
+        "browser",
+        "http",
+        "credentials",
+        "fetch"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Set Access-Control-Allow-Origin: * and expect credentialed fetch/XHR requests to succeed."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "The Fetch standard forbids the wildcard origin for credentialed requests; the browser blocks the response unless the server echoes the specific request Origin and sends Access-Control-Allow-Credentials: true.",
+    "evidence": "The WHATWG Fetch specification (CORS protocol) and MDN document that \"*\" is invalid with credentials; the server must reflect the exact Origin and set Allow-Credentials: true."
+  },
+  "environment": {
+    "description": "Evergreen browsers enforcing the Fetch/CORS protocol."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Enforced by browsers, not by the server or non-browser clients (curl, server-to-server). Non-credentialed requests may use \"*\" freely."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Spec-defined browser behavior."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "jgdzmZddEyR3dYw4-FpxsZw5WByeqdZII5cNGqfZaVt_WZQriqrXIydIp3xuzt5BOiWdUllTgborrXimV3KeDQ"
+  },
+  "id": "nr:sha256:91a074280868aa095bf9d7d0cf6795fac2bbe06b29a4518bcf493016358187e8"
+}

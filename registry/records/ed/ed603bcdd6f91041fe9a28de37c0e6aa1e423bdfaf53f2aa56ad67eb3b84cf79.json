@@ -1,0 +1,45 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Tune hyperparameters and select models by repeatedly evaluating candidates on the same held-out test set, then report that test score as the final estimate of generalization.",
+    "fingerprint": {
+      "domain": "ml",
+      "tags": [
+        "machine-learning",
+        "model-selection",
+        "test-set",
+        "overfitting",
+        "validation"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Use the test set as the selection signal across many trials and quote its score as the final result."
+  },
+  "failure": {
+    "mode": "incorrect_result",
+    "point": "Each decision made using the test set leaks information about it; across many trials the reported score adapts to that particular set and overstates true generalization.",
+    "evidence": "Standard ML methodology (scikit-learn \"Cross-validation\" guidance; the adaptive-data-analysis literature, e.g. Dwork et al., 2015) prescribes a separate validation set or nested cross-validation for selection, leaving the test set untouched until the end."
+  },
+  "environment": {
+    "description": "Any supervised model-selection workflow."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Applies whenever the same data drives both selection and final evaluation. A test set used exactly once, or nested CV, avoids it."
+  },
+  "confidence": {
+    "level": "single_attempt",
+    "notes": "Methodological failure; the bias is statistical and grows with the number of selection trials rather than being a single deterministic error."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "KSLZR26CSM55GqtHIDdXQY23KsQF1o-sYLAlagh-JixEqwcQwKwpHXwSQvMNAtWz6u6vdKfSouc3iyXqw9f5DA"
+  },
+  "id": "nr:sha256:ed603bcdd6f91041fe9a28de37c0e6aa1e423bdfaf53f2aa56ad67eb3b84cf79"
+}

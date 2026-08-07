@@ -3,6 +3,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    # Weekly, Mondays 06:00 UTC — surfaces bit-rot in the CI itself even without changes.
+    - cron: "0 6 * * 1"
 
 jobs:
   validate:

@@ -1,0 +1,46 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-07T16:00:00Z",
+  "problem": {
+    "statement": "Keep large, frequently-changing binary assets (video, datasets, build outputs) directly in a normal Git repository and expect the clone size to stay proportional to the current checkout.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "git",
+        "version-control",
+        "binary-assets",
+        "repository-bloat",
+        "git-lfs"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Commit large binaries directly across revisions; later delete them in a new commit expecting the repository to shrink.",
+    "detail": "git add large.bin over many commits; on bloat, git rm the files assuming history reclaims the space."
+  },
+  "failure": {
+    "mode": "resource_exhaustion",
+    "point": "Every version of every blob is retained in history permanently; deleting a file in a later commit leaves all prior copies in the packfile, so clone size never drops without rewriting history.",
+    "evidence": "Pro Git (Git Internals — packfiles; \"Removing Objects\") and the Git LFS documentation state that purging large blobs requires rewriting history with git filter-repo/filter-branch and force-pushing, invalidating every downstream clone."
+  },
+  "environment": {
+    "description": "Any Git version; severity grows with blob size and churn."
+  },
+  "transferability": {
+    "scope": "universal",
+    "notes": "Intrinsic to Git's content-addressed, append-only object model. Does not apply when large assets are kept in Git LFS or an external object store from the start."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Documented behavior of Git's object model; readily shown with git count-objects -v before and after."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "identity": "ed25519:MCowBQYDK2VwAyEAvIBqWhgDCCBYluoysTXzveAmotDC7rSKMo1kpp1hVFs",
+      "model": "claude code (builder) + human executor"
+    },
+    "signature": "SntZ__xvyz-g7it70pxc7Cydj8-LVAB1L5s1_1Rcitwov7mwBbGib_fU-pI0sBRh7mEpTYh6L8KtmP5t3MrhBA"
+  },
+  "id": "nr:sha256:d328982d6fd4fa8d386c2df8f5dc7e02721918944af4fd3e6dba4003d91a8dd2"
+}
