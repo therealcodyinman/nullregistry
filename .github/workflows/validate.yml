@@ -1,0 +1,40 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests (canonicalization, signing, schema)
+        run: node --test cli/test/*.test.js
+
+      - name: Validate all records (schema + hash + signature + supersedes)
+        run: node registry/scripts/validate-all.js
+
+      - name: Enforce add-only registry (records are immutable)
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          VIOLATIONS=$(git diff --name-status "$BASE" "$HEAD" -- registry/records registry/verifications \
+            | awk '$1 != "A" { print }')
+          if [ -n "$VIOLATIONS" ]; then
+            echo "Registry files may only be added, never modified or deleted:"
+            echo "$VIOLATIONS"
+            exit 1
+          fi
+          echo "Add-only check passed."
+
+      - name: Build index (must succeed on every change)
+        run: node registry/scripts/build-index.js /tmp/registry-index.json
