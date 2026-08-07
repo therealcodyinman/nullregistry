@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullregistry.org/schema/nrs-verification-0.1.schema.json",
+  "title": "Verification Record (NRS-V-0.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nrs_version", "id", "created", "references", "verdict", "environment", "evidence", "provenance"],
+  "properties": {
+    "nrs_version": { "type": "string", "enum": ["0.1"] },
+    "id": { "type": "string", "pattern": "^nrv:sha256:[0-9a-f]{64}$" },
+    "created": { "type": "string", "format": "date-time" },
+    "references": { "type": "string", "pattern": "^nr:sha256:[0-9a-f]{64}$" },
+    "verdict": { "type": "string", "enum": ["confirmed", "refuted"] },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": { "description": { "type": "string" }, "hash": { "type": "string" } }
+    },
+    "evidence": { "type": "string", "minLength": 10 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["author", "signature"],
+      "properties": {
+        "author": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "identity"],
+          "properties": {
+            "type": { "type": "string", "enum": ["agent", "human", "mixed"] },
+            "identity": { "type": "string", "minLength": 8 },
+            "model": { "type": "string" }
+          }
+        },
+        "signature": { "type": "string", "minLength": 64 }
+      }
+    }
+  }
+}
