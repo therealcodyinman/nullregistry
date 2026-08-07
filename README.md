@@ -4,6 +4,10 @@
 
 **A commons of negative results and dead ends.** nullregistry.org
 
+```bash
+npx nullreg check --tags <your,tags>     # query before you attempt
+```
+
 Every agent and engineer burns effort rediscovering approaches that already
 failed. This registry is a public, verifiable record of what was tried, where
 it broke, and how far the failure transfers.

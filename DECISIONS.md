@@ -113,3 +113,36 @@ Architect: Claude. Executor: Cody. Continuing the numbering.
 
 20. **`attest` prints the PR commands only**, never opens the PR — mirrors #11 and
     keeps the human in the loop for the one network-facing step.
+
+---
+
+## Settings hardening + v0.1.0 release
+
+21. **Branch protection uses the classic branch-protection API** (`PUT
+    /branches/main/protection`), not a ruleset — it succeeded first, per the
+    handoff's "pick whichever succeeds first" instruction. Config: require a PR
+    (0 approvals — CI is the gatekeeper), require the `validate` check (strict),
+    block force-pushes and deletions, `enforce_admins: true`. Verified by a
+    rejected direct push of an empty commit to `main` as the owner.
+
+22. **Pages `status` stays `null` for a workflow-built site.** The legacy
+    `status` field in the Pages API is only populated for branch (Jekyll) builds;
+    for `build_type: workflow` it remains `null` even after a successful publish.
+    Authoritative release signals are instead the green `deploy-pages` run, the
+    live `200`, and `registry-index.json` returning `count: 30`. HTTPS was enforced
+    once the certificate reached `approved`.
+
+23. **npm package name is `nullreg` (unscoped).** `npm view nullreg` returned 404
+    (available), so no scope is needed; README install examples use bare `nullreg`.
+
+24. **Schema bundling for the npm tarball.** `spec/schema/` stays canonical; a
+    committed mirror at `cli/schema/` ships in the package `files`, and
+    `cli/lib/schema.js` resolves packaged-first then repo-path. A CI drift check in
+    `validate.yml` diffs the two, and `cli/test/schema.test.js` asserts the CLI
+    resolves through the packaged path and that the copies are byte-identical — so
+    the mirror can never silently diverge.
+
+25. **`npm publish` is the one remaining human step.** No npm auth is available in
+    this environment (`npm whoami` → ENEEDAUTH), so the package is fully prepared
+    and the exact publish command is documented in the release PR; a maintainer
+    with npm auth runs `npm publish --provenance` from `cli/`.
