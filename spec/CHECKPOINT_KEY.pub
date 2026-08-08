@@ -1,10 +1,3 @@
 # Null Registry checkpoint signing key (NRS-C-0.1) — Ed25519 public identity.
-#
-# This is a PLACEHOLDER. The real `ed25519:...` identity is written here
-# automatically by the first run of registry/scripts/checkpoint.js once the
-# private key is set as the GitHub Actions secret CHECKPOINT_KEY_PEM (see
-# spec/CHECKPOINT.md, "The signing key"). Until then, no checkpoint exists and
-# verify-checkpoint.js treats the log as an empty genesis state.
-#
-# Once populated, this file pins the one key permitted to sign the log, so any
-# clone can confirm which key it is trusting. Do not hand-edit the identity line.
+# Pinned here so any clone can confirm which key signs the log. See spec/CHECKPOINT.md.
+ed25519:MCowBQYDK2VwAyEAitsDjbaXDVR_6UwJZkHQEtLWU06KtGLw6wxHSO6Spfc
