@@ -50,5 +50,35 @@ jobs:
           fi
           echo "Add-only check passed."
 
+      - name: Enforce checkpoint immutability (numbered add-only; latest tracks head)
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # Numbered checkpoints (checkpoints/<n>.json) may only be added.
+          CHANGED=$(git diff --name-status "$BASE" "$HEAD" -- checkpoints/)
+          VIOLATIONS=$(echo "$CHANGED" | awk '$2 ~ /^checkpoints\/[0-9]+\.json$/ && $1 != "A" { print }')
+          if [ -n "$VIOLATIONS" ]; then
+            echo "Numbered checkpoints are immutable (add-only):"
+            echo "$VIOLATIONS"
+            exit 1
+          fi
+          # latest.json, when present, must byte-equal the highest-numbered checkpoint.
+          if [ -f checkpoints/latest.json ]; then
+            HIGH=$(ls checkpoints 2>/dev/null | grep -E '^[0-9]+\.json$' | sort -n | tail -1)
+            if [ -z "$HIGH" ]; then
+              echo "checkpoints/latest.json is present but there is no numbered checkpoint."
+              exit 1
+            fi
+            if ! diff -u "checkpoints/$HIGH" checkpoints/latest.json; then
+              echo "checkpoints/latest.json must match the highest-numbered checkpoint ($HIGH)."
+              exit 1
+            fi
+          fi
+          echo "Checkpoint immutability check passed."
+
       - name: Build index (must succeed on every change)
         run: node registry/scripts/build-index.js /tmp/registry-index.json
+
+      - name: Verify the checkpoint chain (no-op until the first checkpoint exists)
+        run: node registry/scripts/verify-checkpoint.js

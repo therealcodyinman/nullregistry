@@ -211,3 +211,80 @@ Architect: Claude. Executor: Cody. Continuing the numbering.
     and adds no record fields. The accountless path does not confer trust: SPEC §3
     still caps confidence and reserves `verified` for independent verification
     records — arrival mechanism grants nothing.
+
+---
+
+## v2 — signed Merkle checkpoints + mirrors
+
+Architect: Claude. Executor: Cody. Continuing the numbering. Format: NRS-C-0.1
+(`spec/CHECKPOINT.md`). No new service; the transparency-log pattern (CT/Rekor)
+over the existing Git store.
+
+33. **The leaf is the id string, not the file bytes.** Records and verifications
+    are already content-addressed, so the Merkle leaf is the UTF-8 of the
+    `nr:`/`nrv:` id, sorted lexicographically. Proofs stay tiny and independent of
+    file formatting and path layout, and the leaf set is recoverable from paths
+    alone (filename == hash, dir == prefix are CI invariants). `nr:` sorts before
+    `nrv:` because `:` (0x3A) < `v` (0x76).
+
+34. **Tree rule: RFC 6962 domain separation + odd-node promotion.** Leaf hash
+    `sha256(0x00 || leaf)`, node hash `sha256(0x01 || left || right)`; a level with
+    an odd count carries its last node up unchanged (not Bitcoin-style
+    duplication). This is exactly what the handoff specified ("RFC 6962-style … odd
+    node promotes"); since there is no external verifier yet, `spec/CHECKPOINT.md`
+    is the canonical definition and `cli/lib/merkle.js` is its reference, pinned by
+    fixed-vector tests so the rule can never silently change.
+
+35. **Checkpoints reuse the record identity + signature scheme.** `key_id` is an
+    `ed25519:…` identity and `signature` is a detached Ed25519 over `JCS(body sans
+    signature)` — the same construction as records. Rather than duplicate crypto,
+    `cli/lib/core.js` gained generic `signDetached`/`verifyDetached`/
+    `identityFromPrivateKeyPem`; records and checkpoints share one code path. A
+    checkpoint is self-verifying via its embedded `key_id`.
+
+36. **`checkpoints/latest.json` is the one permitted mutable file.** Every other
+    tracked file is add-only. CI (`validate.yml`) enforces that numbered
+    checkpoints are add-only and that `latest.json` is byte-identical to the
+    highest-numbered checkpoint. `checkpoints/` sits at repo root, outside the
+    existing `registry/**` add-only rule, so records/verifications immutability is
+    unaffected.
+
+37. **The signing key is durable and human-generated; it is never held in this
+    build or committed.** A checkpoint key must persist (CI re-signs on every
+    change), which rules out the single-use-and-destroy pattern of the seed key
+    (#5). Generating a durable private key in this environment — or echoing one
+    into the transcript — would leak long-lived signing material, so the human
+    generates it and sets only the `CHECKPOINT_KEY_PEM` Actions secret.
+    Consequently **this PR ships no real checkpoint and no real
+    `CHECKPOINT_KEY.pub`**: the first keyed CI run writes both. Tooling is proven
+    instead by tests that generate an ephemeral key and build/verify a full
+    two-checkpoint chain in a temp git repo. `verify-checkpoint.js` and `nullreg
+    root`/`prove` degrade cleanly to a genesis (no-checkpoint) state until then.
+    Threat note: a leaked key can sign a fraudulent root but cannot alter Git or
+    any mirror; recomputation exposes the mismatch. Rotation = new pub + signed
+    handover (see `spec/CHECKPOINT.md`).
+
+38. **Consistency is verified by recomputation at each checkpoint's commit.**
+    `verify-checkpoint.js` recomputes the root over the registry tree at each
+    checkpoint's `git_commit` (deriving leaves from `git ls-tree` paths) and checks
+    it against the signed root, plus signatures and the `prev_checkpoint` hash
+    chain. Verifying each checkpoint against its own commit — rather than the
+    working tree — means a clone that has advanced past the latest checkpoint does
+    not false-alarm, which matters for cron-driven mirrors. Succinct RFC 6962
+    consistency proofs are deferred to v3 (`spec/ROADMAP.md`), exactly as the
+    handoff scoped.
+
+39. **Builder refuses no-op checkpoints with a distinct exit code (3).**
+    `checkpoint.js` exits 3 (not 1) when the root is unchanged since the last
+    checkpoint, so `checkpoint.yml` treats "nothing changed" as a clean skip while
+    still failing loudly on real errors (missing/invalid key). Timestamps honor
+    `SOURCE_DATE_EPOCH` for reproducible test runs.
+
+40. **The checkpoint PR needs a PAT to trigger `validate`.** A PR opened with the
+    default `GITHUB_TOKEN` does not start other workflows, so `validate` (a
+    required check under branch protection) would never run on an
+    auto-created checkpoint PR. `checkpoint.yml` uses `secrets.CHECKPOINT_PR_TOKEN`
+    when present (falling back to `github.token` with a maintainer nudge) and
+    enables `--auto` squash-merge. The PAT is an optional human step documented
+    below; without it a maintainer re-runs CI and merges. Simplest arrangement that
+    keeps the required check in the loop.

@@ -1,0 +1,83 @@
+name: checkpoint
+on:
+  push:
+    branches: [main]
+    paths:
+      - "registry/records/**"
+      - "registry/verifications/**"
+  schedule:
+    # Weekly, Mondays 07:00 UTC — one hour after `validate`, so a fresh signed
+    # tree head is published even in a quiet week.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+# Least privilege: write contents (push the checkpoint branch) and open a PR.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: checkpoint
+  cancel-in-progress: false
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so git_commit + recomputation are meaningful
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build + sign the next checkpoint
+        id: build
+        env:
+          CHECKPOINT_KEY_PEM: ${{ secrets.CHECKPOINT_KEY_PEM }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "${CHECKPOINT_KEY_PEM:-}" ]; then
+            echo "CHECKPOINT_KEY_PEM secret is not set — skipping. See spec/CHECKPOINT.md for setup."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          set +e
+          node registry/scripts/checkpoint.js
+          code=$?
+          set -e
+          if [ "$code" -eq 3 ]; then
+            echo "Root unchanged since the last checkpoint — nothing to publish."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$code" -ne 0 ]; then exit "$code"; fi
+          echo "skip=0" >> "$GITHUB_OUTPUT"
+
+      - name: Verify the new chain before proposing it
+        if: steps.build.outputs.skip == '0'
+        run: node registry/scripts/verify-checkpoint.js
+
+      - name: Open a checkpoint PR (auto-merge once validate passes)
+        if: steps.build.outputs.skip == '0'
+        env:
+          # A PAT (CHECKPOINT_PR_TOKEN) lets `validate` run on the PR — PRs opened
+          # with the default GITHUB_TOKEN do not trigger other workflows. Falls
+          # back to GITHUB_TOKEN, in which case a maintainer nudges CI. See
+          # spec/CHECKPOINT.md and DECISIONS.md.
+          GH_TOKEN: ${{ secrets.CHECKPOINT_PR_TOKEN || github.token }}
+        run: |
+          branch="checkpoint/$(git rev-parse --short HEAD)-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add checkpoints spec/CHECKPOINT_KEY.pub
+          git commit -m "checkpoint: signed Merkle root over the registry"
+          git push origin "$branch"
+          gh pr create \
+            --title "checkpoint: signed Merkle root over the registry" \
+            --label checkpoint \
+            --body "Automated **NRS-C-0.1** checkpoint (signed Merkle tree head). The \`validate\` CI gates this like any PR; \`verify-checkpoint.js\` already ran green in this workflow. Merges to publish a fresh signed root at /checkpoints/latest.json." \
+            || { echo "PR create failed (label may be missing or PR exists)"; exit 1; }
+          gh pr merge --auto --squash "$branch" || echo "Auto-merge not enabled; a maintainer will merge after validate passes."

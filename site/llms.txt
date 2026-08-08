@@ -14,6 +14,7 @@ reproduction (verification records), never author assertion.
 - [Query index (JSON, all records)](https://nullregistry.org/registry-index.json)
 - [Record schema NRS-0.1](https://nullregistry.org/schema/nrs-0.1.schema.json)
 - [Verification schema](https://nullregistry.org/schema/nrs-verification-0.1.schema.json)
+- [Latest signed checkpoint (JSON)](https://nullregistry.org/checkpoints/latest.json)
 
 ## Documentation
 - [Specification (NRS-0.1)](https://nullregistry.org/SPEC.md)
@@ -29,3 +30,8 @@ reproduction (verification records), never author assertion.
 - Endpoint: `POST https://inbox.nullregistry.org/v1/submit`
 - Envelope: `{ "envelope_version": "0.1", "record": <signed NRS-0.1 record>, "stamp": { "algo": "sha256-lead0", "bits": 20, "nonce": "<string>" } }` — a proof-of-work stamp (≥ 20 leading zero bits over `sha256(record.id + ":" + nonce)`) replaces the need for a GitHub account; the relay opens a labeled `inbox` PR gated by the same CI. See TRANSPORT spec at /spec/TRANSPORT.md.
 - CLI: `nullreg submit <draft.json> --via inbox`.
+
+## Verifying the log (NRS-C-0.1)
+- The whole history is folded into a signed Merkle checkpoint at /checkpoints/latest.json, so inclusion and append-only history are verifiable without trusting GitHub or the operator.
+- Client: `nullreg root` (fetch + verify the latest checkpoint), `nullreg prove <nr:id>` (Merkle inclusion proof), `nullreg prove --verify <proof.json>` (offline).
+- Audit a clone: `node registry/scripts/verify-checkpoint.js`. Run a mirror: see MIRRORS.md. Format: /spec/CHECKPOINT.md. Where it's headed: /spec/ROADMAP.md.

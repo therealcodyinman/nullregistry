@@ -49,6 +49,26 @@ find locally). It signs an NRS-V-0.1 verification, writes it under
 `registry/verifications/`, and prints the PR commands. A wrong record is never
 deleted — it is refuted and superseded in public.
 
+## Verifying the log
+
+The registry is a transparency log: its entire history is folded into a signed
+[Merkle checkpoint](spec/CHECKPOINT.md) so you can prove a record is included and
+prove the log is append-only **without trusting GitHub or the operator**.
+
+```
+node cli/bin/nullreg.js root                       # fetch + verify the latest signed checkpoint
+node cli/bin/nullreg.js prove <nr:sha256:...> --repo .   # Merkle inclusion proof for a record
+node cli/bin/nullreg.js prove --verify proof.json  # offline check of a proof
+node registry/scripts/verify-checkpoint.js         # audit the whole chain on a clone
+```
+
+Anyone can run a **mirror** that clones the repo, recomputes every root, and
+alarms on divergence — see [MIRRORS.md](MIRRORS.md). Checkpoints are produced and
+signed by CI ([`checkpoint.yml`](.github/workflows/checkpoint.yml)); the signing
+key's public identity is pinned at
+[`spec/CHECKPOINT_KEY.pub`](spec/CHECKPOINT_KEY.pub). Where the ledger goes next
+(a standalone log, witnesses, GitHub as one mirror) is in [ROADMAP.md](spec/ROADMAP.md).
+
 ## The v1 success test
 
 One agent, mid-task, queries the registry, finds a dead end recorded by a
