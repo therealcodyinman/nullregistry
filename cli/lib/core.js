@@ -63,6 +63,34 @@ function keyFromIdentity(identity) {
   return crypto.createPublicKey({ key: der, format: 'der', type: 'spki' });
 }
 
+// --- Generic Ed25519 identity/sign/verify over arbitrary bytes --------------
+// Records sign their canonical body; checkpoints (NRS-C-0.1) sign a canonical
+// checkpoint body. Both use the same identity scheme and detached signatures,
+// so these helpers back both without either duplicating crypto.
+function identityFromPublicKey(publicKey) {
+  return 'ed25519:' + publicKey.export({ type: 'spki', format: 'der' }).toString('base64url');
+}
+
+function identityFromPrivateKeyPem(privateKeyPem) {
+  const pub = crypto.createPublicKey(crypto.createPrivateKey(privateKeyPem));
+  return identityFromPublicKey(pub);
+}
+
+function publicKeyPemFromPrivateKeyPem(privateKeyPem) {
+  return crypto.createPublicKey(crypto.createPrivateKey(privateKeyPem))
+    .export({ type: 'spki', format: 'pem' });
+}
+
+function signDetached(message, privateKeyPem) {
+  return crypto.sign(null, Buffer.from(message, 'utf8'), crypto.createPrivateKey(privateKeyPem))
+    .toString('base64url');
+}
+
+function verifyDetached(message, signatureB64url, identity) {
+  return crypto.verify(null, Buffer.from(message, 'utf8'), keyFromIdentity(identity),
+    Buffer.from(signatureB64url, 'base64url'));
+}
+
 function signRecord(record, privateKeyPem) {
   const sig = crypto.sign(null, Buffer.from(canonicalBody(record), 'utf8'),
     crypto.createPrivateKey(privateKeyPem));
@@ -124,4 +152,6 @@ function verifyVerification(record) {
 
 module.exports = { canonicalize, canonicalBody, hashCanonicalBody, computeId,
   computeVerificationId, shardPath, generateKeypair, keyFromIdentity, signRecord,
-  verifyRecord, verifyVerification, leadingZeroBits, stampBits, computeStamp };
+  verifyRecord, verifyVerification, leadingZeroBits, stampBits, computeStamp,
+  identityFromPublicKey, identityFromPrivateKeyPem, publicKeyPemFromPrivateKeyPem,
+  signDetached, verifyDetached };

@@ -4,10 +4,13 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const core = require('../lib/core.js');
+const merkle = require('../lib/merkle.js');
+const ckpt = require('../lib/checkpoint.js');
 const { validate } = require('../lib/validate.js');
 const { loadSchema: loadNamedSchema } = require('../lib/schema.js');
 
 const DEFAULT_INDEX_URL = 'https://nullregistry.org/registry-index.json';
+const DEFAULT_CHECKPOINT_URL = 'https://nullregistry.org/checkpoints/latest.json';
 const KEY_DIR = path.join(os.homedir(), '.nullreg');
 
 function loadSchema() { return loadNamedSchema('nrs-0.1.schema.json'); }
@@ -209,6 +212,98 @@ async function cmdAttest() {
   console.log('  gh pr create --title "Verification (' + verdict + ')" --body "Submitted via nullreg attest"');
 }
 
+// Fetch the latest signed checkpoint from the site, verify its signature, and
+// print the root + size — the log's current head, self-authenticating.
+async function cmdRoot() {
+  const url = arg('--url') || DEFAULT_CHECKPOINT_URL;
+  const localFile = arg('--checkpoint-file');
+  let doc;
+  if (localFile) {
+    doc = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+  } else {
+    const res = await fetch(url);
+    if (!res.ok) { console.error('Checkpoint fetch failed: HTTP ' + res.status); process.exit(2); }
+    doc = await res.json();
+  }
+  const sigOk = ckpt.verifyCheckpointSignature(doc);
+  console.log('origin:    ' + doc.origin);
+  console.log('size:      ' + doc.size + ' leaves');
+  console.log('root:      ' + doc.root);
+  console.log('created:   ' + doc.created);
+  console.log('key_id:    ' + doc.key_id);
+  console.log('signature: ' + (sigOk ? 'VALID' : 'INVALID'));
+  if (!sigOk) process.exit(1);
+}
+
+// Build the Merkle inclusion proof for a record against the current registry
+// state, or verify a previously produced proof offline.
+async function cmdProve() {
+  // Offline verification of a saved proof.
+  if (arg('--verify')) {
+    const proof = JSON.parse(fs.readFileSync(arg('--verify'), 'utf8'));
+    const ok = merkle.verifyInclusion(proof.leaf, proof.path, proof.root);
+    if (!ok) { console.error('INVALID: proof does not reconstruct root ' + proof.root); process.exit(1); }
+    let msg = 'VALID: ' + proof.leaf + '\n  in a tree of ' + proof.tree_size + ' leaves, root ' + proof.root;
+    if (proof.checkpoint) {
+      const match = proof.checkpoint.root === proof.root;
+      msg += '\n  checkpoint root ' + (match ? 'MATCHES' : 'DIFFERS') + ' (' + proof.checkpoint.root + ')';
+      if (!match) { console.error(msg); process.exit(1); }
+    }
+    console.log(msg);
+    return;
+  }
+
+  const id = process.argv[3];
+  if (!id || !/^nr:sha256:[0-9a-f]{64}$/.test(id)) {
+    console.error('Usage: nullreg prove <nr:sha256:...> [--repo p] [--checkpoint-file f | --url u] [--out proof.json]');
+    console.error('       nullreg prove --verify <proof.json>');
+    process.exit(2);
+  }
+  const repoRoot = arg('--repo') || process.cwd();
+  const leaves = ckpt.collectLeaves(repoRoot);
+  const index = leaves.indexOf(id);
+  if (index < 0) {
+    console.error('Record not found in ' + path.join(repoRoot, 'registry') + ' — clone the repo and pass --repo.');
+    process.exit(1);
+  }
+  const root = merkle.computeRoot(leaves);
+  const proof = {
+    leaf: id,
+    leaf_index: index,
+    tree_size: leaves.length,
+    path: merkle.inclusionProof(leaves, index),
+    root,
+  };
+
+  // Optionally bind the proof to a published checkpoint.
+  const url = arg('--url');
+  const localFile = arg('--checkpoint-file');
+  if (url || localFile || !arg('--no-checkpoint')) {
+    try {
+      let doc;
+      if (localFile) doc = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+      else {
+        const res = await fetch(url || DEFAULT_CHECKPOINT_URL);
+        if (res.ok) doc = await res.json();
+      }
+      if (doc) {
+        proof.checkpoint = { root: doc.root, size: doc.size, created: doc.created,
+          signature_valid: ckpt.verifyCheckpointSignature(doc) };
+      }
+    } catch { /* checkpoint binding is best-effort; the proof stands on its own root */ }
+  }
+
+  const out = JSON.stringify(proof, null, 2) + '\n';
+  const outFile = arg('--out');
+  if (outFile) { fs.writeFileSync(outFile, out); console.log('Proof written: ' + outFile); }
+  else process.stdout.write(out);
+
+  if (proof.checkpoint && proof.checkpoint.root !== root) {
+    console.error('\nNote: local tree root differs from the published checkpoint — your clone may be');
+    console.error('ahead of or behind the latest checkpoint. The proof is valid against the local root.');
+  }
+}
+
 async function main() {
   const cmd = process.argv[2];
   try {
@@ -217,6 +312,8 @@ async function main() {
     else if (cmd === 'verify') await cmdVerify(process.argv[3]);
     else if (cmd === 'submit') await cmdSubmit(process.argv[3]);
     else if (cmd === 'attest') await cmdAttest();
+    else if (cmd === 'root') await cmdRoot();
+    else if (cmd === 'prove') await cmdProve();
     else {
       console.log('nullreg — client for the Null Registry (nullregistry.org)\n');
       console.log('  nullreg keygen                          generate an Ed25519 identity');
@@ -226,6 +323,9 @@ async function main() {
       console.log('  nullreg verify <record.json>            offline schema+hash+signature check');
       console.log('  nullreg attest <nr:id> --verdict confirmed|refuted --evidence "..." --env "..."');
       console.log('                                          author a verification record for a PR');
+      console.log('  nullreg root [--url u]                   fetch + verify the latest signed checkpoint');
+      console.log('  nullreg prove <nr:id> [--repo p]        Merkle inclusion proof against the log');
+      console.log('  nullreg prove --verify <proof.json>     offline check of an inclusion proof');
       process.exit(cmd ? 2 : 0);
     }
   } catch (e) { console.error('Error: ' + e.message); process.exit(2); }

@@ -36,6 +36,8 @@ jobs:
           cp spec/schema/nrs-verification-0.1.schema.json site/
           cp SPEC.md site/
           mkdir -p site/schema && cp spec/schema/*.json site/schema/
+          # Publish the signed checkpoint chain (served at /checkpoints/latest.json).
+          if [ -d checkpoints ]; then cp -r checkpoints site/; fi
 
       - uses: actions/configure-pages@v5
         with:
