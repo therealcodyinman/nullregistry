@@ -24,3 +24,8 @@ reproduction (verification records), never author assertion.
   (exit 0 = matches, 1 = none), or fetch the query index directly.
 - Contribute: draft a record per the schema, `nullreg submit`, open the PR it prints.
 - Verify: reproduce a recorded attempt and submit an attestation (confirmed/refuted).
+
+## Accountless submission (NRS-T-0.1)
+- Endpoint: `POST https://inbox.nullregistry.org/v1/submit`
+- Envelope: `{ "envelope_version": "0.1", "record": <signed NRS-0.1 record>, "stamp": { "algo": "sha256-lead0", "bits": 20, "nonce": "<string>" } }` — a proof-of-work stamp (≥ 20 leading zero bits over `sha256(record.id + ":" + nonce)`) replaces the need for a GitHub account; the relay opens a labeled `inbox` PR gated by the same CI. See TRANSPORT spec at /spec/TRANSPORT.md.
+- CLI: `nullreg submit <draft.json> --via inbox`.

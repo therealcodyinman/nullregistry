@@ -92,10 +92,36 @@ function verifyRecord(record) {
   return verifyWithExpectedId(record, computeId(record));
 }
 
+// --- Proof-of-work stamp (NRS-T-0.1) ----------------------------------------
+// The accountless inbox transport prices spam in CPU: a stamp is a nonce whose
+// SHA-256(id + ":" + nonce) has >= `bits` leading zero bits. The stamp lives in
+// the submission envelope, never in the record (see spec/TRANSPORT.md).
+function leadingZeroBits(buf) {
+  let count = 0;
+  for (const b of buf) {
+    if (b === 0) { count += 8; continue; }
+    count += Math.clz32(b) - 24; // b is 1..255 here → 0..7 leading zeros
+    break;
+  }
+  return count;
+}
+
+function stampBits(id, nonce) {
+  return leadingZeroBits(crypto.createHash('sha256').update(id + ':' + nonce, 'utf8').digest());
+}
+
+// Search decimal nonces until one meets the difficulty. Returns the envelope
+// stamp object.
+function computeStamp(id, bits) {
+  let n = 0;
+  while (stampBits(id, String(n)) < bits) n++;
+  return { algo: 'sha256-lead0', bits, nonce: String(n) };
+}
+
 function verifyVerification(record) {
   return verifyWithExpectedId(record, computeVerificationId(record));
 }
 
 module.exports = { canonicalize, canonicalBody, hashCanonicalBody, computeId,
   computeVerificationId, shardPath, generateKeypair, keyFromIdentity, signRecord,
-  verifyRecord, verifyVerification };
+  verifyRecord, verifyVerification, leadingZeroBits, stampBits, computeStamp };

@@ -76,6 +76,32 @@ node cli/bin/nullreg.js submit draft.json --repo .   # validates, hashes, signs,
 Ed25519 public key; reputation accrues to it over time. Anonymous submission is
 allowed but permanently capped at `anecdotal` confidence.
 
+## Accountless submission (no GitHub account)
+
+If you have no GitHub account, you can still land a record: a stateless relay
+opens the pull request for you. You sign the record exactly as above, attach a
+proof-of-work stamp (CPU instead of an account, as the anti-spam price), and POST
+it. The relay runs the same mechanical checks and opens a PR labeled `inbox`;
+from there it flows through `validate` CI like any other PR.
+
+```bash
+node cli/bin/nullreg.js keygen                          # once per identity
+node cli/bin/nullreg.js submit draft.json --via inbox   # signs, stamps (PoW), POSTs, prints the PR url
+```
+
+- Difficulty is **20 leading zero bits** at launch (a second or two of CPU);
+  override with `--bits`, though the relay enforces its own minimum and the CLI
+  automatically re-solves if asked for more.
+- The endpoint defaults to `https://inbox.nullregistry.org/v1/submit`; override
+  with `--inbox-url`.
+- The stamp lives in the transport envelope, never in the record — records stay
+  byte-identical whether submitted by PR or inbox.
+
+This transport is defined in [spec/TRANSPORT.md](spec/TRANSPORT.md) (NRS-T-0.1)
+and documented operationally in [inbox/README.md](inbox/README.md). It is a front
+door, not the ledger: the Git repo remains the registry of record, and if the
+relay is down the hand-authored PR path above is unaffected.
+
 ## Attesting (verify or refute a record)
 
 The highest-value contribution is **reproduction**. If you re-ran a recorded

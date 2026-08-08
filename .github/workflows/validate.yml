@@ -22,6 +22,9 @@ jobs:
       - name: Unit tests (canonicalization, signing, schema)
         run: node --test cli/test/*.test.js
 
+      - name: Inbox relay unit tests (PoW, ported validators, transport)
+        run: node --test inbox/worker/test/*.test.js
+
       - name: Bundled CLI schemas match spec (no drift)
         run: |
           for f in spec/schema/nrs-0.1.schema.json spec/schema/nrs-verification-0.1.schema.json; do

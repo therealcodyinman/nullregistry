@@ -72,8 +72,10 @@ async function cmdVerify(file) {
   console.log('VALID ' + record.id);
 }
 
+const DEFAULT_INBOX_URL = 'https://inbox.nullregistry.org/v1/submit';
+const DEFAULT_STAMP_BITS = 20;
+
 async function cmdSubmit(file) {
-  const repoRoot = arg('--repo') || process.cwd();
   const draft = JSON.parse(fs.readFileSync(file, 'utf8'));
   const identity = fs.readFileSync(path.join(KEY_DIR, 'identity'), 'utf8').trim();
   const privateKeyPem = fs.readFileSync(path.join(KEY_DIR, 'key.pem'), 'utf8');
@@ -86,6 +88,13 @@ async function cmdSubmit(file) {
   draft.provenance.signature = core.signRecord(draft, privateKeyPem);
   const schemaErrors = validate(loadSchema(), draft);
   if (schemaErrors.length) { console.error('Draft invalid:\n  ' + schemaErrors.join('\n  ')); process.exit(1); }
+
+  // Opt-in accountless transport: compute a proof-of-work stamp and POST the
+  // signed record to the inbox relay, which opens the PR. Default stays the
+  // local/PR path below (no network, no account assumptions).
+  if (arg('--via') === 'inbox') { return submitViaInbox(draft); }
+
+  const repoRoot = arg('--repo') || process.cwd();
   const rel = path.join('registry', 'records', core.shardPath(draft.id));
   const dest = path.join(repoRoot, rel);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
@@ -95,6 +104,44 @@ async function cmdSubmit(file) {
   console.log('  git checkout -b record/' + draft.id.slice(10, 22));
   console.log('  git add ' + rel + ' && git commit -m "record: ' + draft.problem.statement.slice(0, 60) + '"');
   console.log('  gh pr create --title "Null record: ' + draft.problem.statement.slice(0, 60) + '" --body "Submitted via nullreg"');
+}
+
+async function submitViaInbox(record) {
+  const url = arg('--inbox-url') || DEFAULT_INBOX_URL;
+  let bits = parseInt(arg('--bits') || String(DEFAULT_STAMP_BITS), 10);
+  if (!Number.isInteger(bits) || bits < 1) { console.error('--bits must be a positive integer'); process.exit(2); }
+
+  // Up to three attempts: one per honored `retry-with-higher-bits` bump.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    process.stderr.write('Computing proof-of-work stamp (' + bits + ' bits)...\n');
+    const stamp = core.computeStamp(record.id, bits);
+    const envelope = { envelope_version: '0.1', record, stamp };
+    let res, body;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(envelope),
+      });
+      body = await res.json().catch(() => ({}));
+    } catch (e) {
+      console.error('Inbox submission failed: ' + e.message); process.exit(1);
+    }
+    if (res.ok && body && body.ok) {
+      console.log('Submitted via inbox. Pull request: ' + body.pr);
+      return;
+    }
+    if (body && body.error === 'retry-with-higher-bits' && Number.isInteger(body.required_bits) && body.required_bits > bits) {
+      bits = body.required_bits;
+      continue;
+    }
+    const label = (body && body.error) || ('HTTP ' + (res ? res.status : '?'));
+    const detail = (body && body.message) ? ': ' + body.message : '';
+    console.error('Inbox rejected the submission [' + label + ']' + detail);
+    process.exit(1);
+  }
+  console.error('Inbox submission failed after raising difficulty; try again later.');
+  process.exit(1);
 }
 
 async function cmdAttest() {
@@ -175,6 +222,7 @@ async function main() {
       console.log('  nullreg keygen                          generate an Ed25519 identity');
       console.log('  nullreg check --tags a,b [--domain d]   query the registry for dead ends');
       console.log('  nullreg submit <draft.json> [--repo p]  sign a draft and stage it for PR');
+      console.log('  nullreg submit <draft.json> --via inbox  sign, stamp (PoW) and POST to the accountless inbox');
       console.log('  nullreg verify <record.json>            offline schema+hash+signature check');
       console.log('  nullreg attest <nr:id> --verdict confirmed|refuted --evidence "..." --env "..."');
       console.log('                                          author a verification record for a PR');

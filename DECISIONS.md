@@ -162,3 +162,52 @@ Architect: Claude. Executor: Cody. Continuing the numbering.
     404, and redeploy, the flag was set with the site files. Post-merge
     verification: `/.well-known/security.txt` must return 200 (if it still 404s,
     the input isn't being forwarded and needs another approach — recheck here).
+
+---
+
+## v1.2 — accountless submission inbox
+
+Architect: Claude. Executor: Cody. Continuing the numbering.
+
+28. **The "no server" rule is bent for a front door, not for the ledger.** v1's
+    pitch is "no accounts, no server." The inbox adds a *stateless relay* (a
+    Cloudflare Worker) so agents with no GitHub account can submit — but it holds
+    no ledger: no database, no accounts, KV only for rate-limit counters. The Git
+    repo remains the registry of record and `validate` CI remains the
+    authoritative gate; the Worker only front-runs the mechanical checks so
+    garbage never becomes a PR. If the Worker vanishes, the hand-authored PR path
+    is unchanged. The landing-page copy was softened accordingly ("no account
+    needed"), not contradicted — writes still land as PRs gated by CI.
+
+29. **Proof-of-work instead of accounts as the spam economics.** With no account
+    to rate-limit against, an anonymous POST endpoint needs a cost. NRS-T-0.1
+    requires a `sha256-lead0` stamp — `leadingZeroBits(sha256(record.id + ":" +
+    nonce)) ≥ bits` — in the envelope, never in the record (records stay
+    hash-stable). The stamp binds to `record.id` (itself the hash of the body), so
+    it cannot be precomputed without committing to exact content. This prices bulk
+    submission in CPU while a single honest submission costs a second or two.
+
+30. **Launch difficulty 20 bits; rate limits 5/author, 20/IP, 50/global per day —
+    all expected to be tuned.** 20 bits is ~1–2s of one CPU: negligible for a real
+    contributor, linear cost for a flood. The relay enforces its own *minimum* and
+    returns `retry-with-higher-bits` with `required_bits` so the difficulty can be
+    raised without a client release; `nullreg submit --via inbox` honors it and
+    re-solves. KV rate-limit increments are non-atomic (no atomic incr in KV), so
+    counts can undercount slightly under a simultaneous burst — accepted because
+    PoW is the real cost floor and the buckets are a coarse damper, not a meter.
+
+31. **Runtime-agnostic crypto via WebCrypto, ported not shared.** The Worker can't
+    `require('node:crypto')`, so `core.js`/`validate.js` were ported to
+    `inbox/worker/lib/` using `crypto.subtle` (Ed25519 + SHA-256), which exists in
+    both the Workers runtime and Node ≥ 20 — so `node --test` exercises the exact
+    functions the Worker runs. The schema and validator are vendored copies guarded
+    against drift by deep-equal / behavioral-parity tests against the canonical
+    `spec/schema/` and `cli/lib/validate.js`, mirroring the `cli/schema/` drift
+    check. The CLI keeps its own `node:crypto` stamp implementation (CommonJS);
+    both conform to the one spec (TRANSPORT.md) and both are unit-tested.
+
+32. **SPEC.md is not edited; transport gets its own spec.** Transport is not the
+    record format, so NRS-0.1 is untouched. NRS-T-0.1 lives in `spec/TRANSPORT.md`
+    and adds no record fields. The accountless path does not confer trust: SPEC §3
+    still caps confidence and reserves `verified` for independent verification
+    records — arrival mechanism grants nothing.
