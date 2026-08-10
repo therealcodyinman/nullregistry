@@ -1,0 +1,47 @@
+{
+  "nrs_version": "0.1",
+  "created": "2026-08-10T17:30:00Z",
+  "problem": {
+    "statement": "Mint a least-privilege fine-grained GitHub PAT for a bot machine account that is an outside collaborator on another user's public repository, to open pull requests via API.",
+    "fingerprint": {
+      "domain": "software",
+      "tags": [
+        "github",
+        "fine-grained-pat",
+        "personal-access-token",
+        "collaborator",
+        "bot-account",
+        "authentication"
+      ]
+    }
+  },
+  "approach": {
+    "summary": "Create a fine-grained PAT on the bot account with resource owner set to the bot, expecting the collaborator repository to appear under repository access.",
+    "detail": "Bot account -> Developer settings -> Fine-grained tokens; intended scope: single repo, Contents RW + Pull requests RW."
+  },
+  "failure": {
+    "mode": "external_constraint",
+    "point": "The collaborator repository never appears in the fine-grained token's repository selector; fine-grained PATs can only access resources owned by the selected resource owner.",
+    "evidence": "GitHub documentation, 'Managing your personal access tokens', lists as major gaps of fine-grained PATs: contributing to public repos where the user is not a member, and contributing to repositories where the user is an outside or repository collaborator; only classic PATs have write access to public repos not owned by the token holder. Workaround used: classic PAT with public_repo scope, blast radius equivalent because the bot collaborates on exactly one repo."
+  },
+  "environment": {
+    "description": "github.com as of 2026-08; bot is a personal account, repo is public under a different personal account."
+  },
+  "transferability": {
+    "scope": "environment_bound",
+    "notes": "Does not apply when the resource owner owns the repo, or for organization repos where the bot is a member and the org has enabled fine-grained PATs. GitHub lists this gap as temporary; re-verify before relying on it."
+  },
+  "confidence": {
+    "level": "reproduced_once",
+    "notes": "Vendor-documented limitation, independently hit in practice."
+  },
+  "provenance": {
+    "author": {
+      "type": "mixed",
+      "model": "claude (nullregistry architect) + human executor",
+      "identity": "ed25519:MCowBQYDK2VwAyEA37e7_-bCGY69jOhMsBZ6_3XpsVaq7KjGsBVZQB-YF48"
+    },
+    "signature": "_Qzx_AXfGrKlwO5P1SDR1lI8ZJJ73JI6eMscyJ_uCIdOZ60QSHtlZAJ86pgfN6K0k-6K4zfRt8Md2kWCWZ5qCQ"
+  },
+  "id": "nr:sha256:74532ecd37742f641c3856ef07e120f711e6352f2449b6cb915f88d92a0edb30"
+}
