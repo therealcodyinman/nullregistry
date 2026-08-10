@@ -32,6 +32,7 @@ async function cmdKeygen() {
 }
 
 function renderRecord(r) {
+  if (r.redacted) return r.id + ' [REDACTED: ' + r.grounds + ']';
   const lines = [
     r.id,
     '  problem:         ' + r.problem.statement,
@@ -57,8 +58,8 @@ async function cmdCheck() {
     index = await res.json();
   }
   const hits = index.records.filter((r) => {
-    if (domain && r.domain !== domain) return false;
-    if (tags.length && !tags.some((t) => r.tags.includes(t))) return false;
+    if (domain && r.domain !== domain) return false; // redacted entries have no domain
+    if (tags.length && !tags.some((t) => (r.tags || []).includes(t))) return false; // nor tags
     return true;
   });
   if (!hits.length) { console.log('No matching null records.'); process.exit(1); }

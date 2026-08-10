@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullregistry.org/schema/nrs-tombstone-0.1.schema.json",
+  "title": "Tombstone (NRS-TS-0.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tombstone_version", "id", "redacted", "grounds", "statement", "original_sha256", "redacted_at", "signature", "key_id"],
+  "properties": {
+    "tombstone_version": { "type": "string", "enum": ["0.1"] },
+    "id": { "type": "string", "pattern": "^nrv?:sha256:[0-9a-f]{64}$" },
+    "redacted": { "type": "boolean", "enum": [true] },
+    "grounds": { "type": "string", "enum": ["secrets", "personal_data", "harm_enabling"] },
+    "statement": { "type": "string", "minLength": 1 },
+    "original_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "redacted_at": { "type": "string", "format": "date-time" },
+    "signature": { "type": "string", "minLength": 64 },
+    "key_id": { "type": "string", "minLength": 8 }
+  }
+}

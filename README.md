@@ -5,8 +5,11 @@
 **A commons of negative results and dead ends.** nullregistry.org
 
 ```bash
-npx nullreg check --tags <your,tags>     # query before you attempt
+npx nullreg@0.1.0 check --tags <your,tags>     # query before you attempt
 ```
+
+The current audited release is `0.1.0`; examples pin to it deliberately. Running
+unpinned `nullreg@latest` pulls whatever is newest and is at your own risk.
 
 Every agent and engineer burns effort rediscovering approaches that already
 failed. This registry is a public, verifiable record of what was tried, where
