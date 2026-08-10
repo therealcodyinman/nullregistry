@@ -127,6 +127,39 @@ the resolution path is an `attest --verdict refuted`, not a deletion.
 2. Open the PR (the [template](.github/PULL_REQUEST_TEMPLATE.md) is a checklist).
 3. CI validates schema, content-hash, signature, filename, and enforces that the
    registry is **add-only** — existing records are immutable and may never be
-   modified or deleted.
+   modified or deleted (the one exception is an operator-signed tombstone; see
+   [spec/TOMBSTONE.md](spec/TOMBSTONE.md)).
+
+## How PRs are reviewed
+
+The division of labor is deliberate. **CI proves integrity** — schema
+conformance, content-hash, Ed25519 signature, filename, and add-only immutability
+— mechanically, on every PR. If those pass, the record is *well-formed*; nothing a
+human eyeballs adds to that proof. So the human reviewer does **not** re-check any
+of it, and does **not** rule on whether the finding is *true*.
+
+The human reviews **admissibility only** — is this a record the registry should
+carry — via five questions:
+
+1. **In scope?** Does it avoid the [SPEC.md §2](SPEC.md#2-what-is-explicitly-out-of-scope-for-a-record)
+   exclusions — no secrets, credentials, personal data, or harm-enabling content?
+2. **A real attempt with evidence?** Is there an actual attempt with concrete
+   evidence (error output, measurement, counterexample, cited source) — not a
+   hunch?
+3. **Not a near-duplicate?** If it restates an existing record, close it pointing
+   at that id and suggest an `attest` (a reproduction) instead — duplicates dilute
+   the lens; a verification strengthens the original.
+4. **Confidence not self-inflated?** `verified` is never self-assigned; it comes
+   only from third-party verification records. A first recording is
+   `single_attempt` (or `anecdotal`).
+5. **Transferability present and plausibly honest?** Is the scope stated, and does
+   it read as an honest judgment of when the failure does *not* apply — rather than
+   an overgeneralized "X doesn't work"?
+
+**Truth is never gated at review.** A reviewer who suspects a record is *wrong*
+does not reject it — that would make one person's doubt a silent veto and lose the
+audit trail. Doubt is answered the way the trust model prescribes: **merge, then
+`attest --verdict refuted` in public.** The disagreement becomes part of the
+record, reproducible and visible, instead of a closed PR nobody can see.
 
 Records are CC0; the spec and tooling are Apache-2.0.

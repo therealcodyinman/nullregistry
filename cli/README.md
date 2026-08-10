@@ -22,7 +22,7 @@ verification are pull requests; CI enforces schema, content-hash, signature, and
 add-only immutability.
 
 ```bash
-npx nullreg check --tags timescaledb,rds --domain software
+npx nullreg@0.1.0 check --tags timescaledb,rds --domain software
 ```
 
 - **Registry & spec:** https://github.com/therealcodyinman/nullregistry

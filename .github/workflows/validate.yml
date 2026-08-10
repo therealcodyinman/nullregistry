@@ -36,19 +36,9 @@ jobs:
       - name: Validate all records (schema + hash + signature + supersedes)
         run: node registry/scripts/validate-all.js
 
-      - name: Enforce add-only registry (records are immutable)
+      - name: Enforce add-only registry (immutable; one NRS-TS-0.1 tombstone carve-out)
         if: github.event_name == 'pull_request'
-        run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
-          VIOLATIONS=$(git diff --name-status "$BASE" "$HEAD" -- registry/records registry/verifications \
-            | awk '$1 != "A" { print }')
-          if [ -n "$VIOLATIONS" ]; then
-            echo "Registry files may only be added, never modified or deleted:"
-            echo "$VIOLATIONS"
-            exit 1
-          fi
-          echo "Add-only check passed."
+        run: node registry/scripts/check-add-only.js "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
 
       - name: Enforce checkpoint immutability (numbered add-only; latest tracks head)
         if: github.event_name == 'pull_request'

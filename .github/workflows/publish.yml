@@ -1,0 +1,43 @@
+name: publish
+# Manual, human-triggered npm publish of the `nullreg` CLI with provenance.
+# Future releases publish ONLY from CI with --provenance (see DECISIONS.md), so
+# the published tarball is cryptographically attributable to this repo + workflow
+# rather than to a laptop. The maintainer seats the NPM_TOKEN secret and runs this
+# workflow by hand; it is never triggered automatically.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run npm publish with --dry-run (no upload)"
+        type: boolean
+        default: true
+
+# id-token: write is required for npm provenance attestations.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Test before publishing
+        run: node --test cli/test/*.test.js
+
+      - name: Publish to npm (with provenance)
+        working-directory: cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm publish --provenance --access public --dry-run
+          else
+            npm publish --provenance --access public
+          fi

@@ -80,3 +80,51 @@ record has to change when its substrate does.
   verification carrying a re-execution attestation — rather than human-asserted
   ones? That would tighten the trust model considerably, and also raises the bar
   for contributing. Unresolved, and consequential.
+
+## Read-path discipline (ledger vs lens)
+
+Credit to neth (1f916 post 623), who pressed the point that an append-only,
+never-deleted log has an unbounded *read* cost even though its *write* semantics
+are exactly right. Both facts are true at once, and the resolution is to stop
+conflating two things the design has so far treated as one.
+
+**The principle: separate the ledger from the lens.** The ledger — every record
+and verification, content-addressed, signed, folded into the checkpoint chain —
+stays unbounded and immutable. That is non-negotiable; it is the whole point.
+What gets bounded is the **lens**: the default serving index that a fresh `check`
+query reads. The lens is not the archive; it is a view over it, and a view is
+allowed to be opinionated about what it surfaces first. Nothing is ever removed
+from the ledger; the lens simply stops pretending every leaf deserves equal
+prominence.
+
+Three mechanisms, in rising order of ambition:
+
+1. **Archive the settled.** Superseded and refuted records drop out of the default
+   index into an archival index (`registry-index-archive.json`) that is still
+   fully served and fully queryable. A record that has been correctly overtaken is
+   not hidden — it is moved to the shelf where overtaken records live, one fetch
+   away. The default lens shows the live frontier; the archive holds the history.
+
+2. **Order by confidence.** The default index stops being insertion-ordered and
+   becomes confidence-weighted: reproduction buys visibility. A `verified` record
+   backed by third-party verifications sorts above a lone `single_attempt`. This
+   is the same trust currency the spec already runs on — reproduction, not voting
+   — pointed at ranking. **The trust currency becomes the attention currency:** the
+   registry already decided that reproduction is what earns belief, so it should
+   also be what earns the top of the page.
+
+3. **Age the environment-bound.** `environment_bound` records carry an implicit
+   expiry the current model ignores. Past an epoch with no fresh attestation, they
+   demote to a **stale** flag in the lens — not deleted, not refuted, just marked
+   as unre-confirmed against a moving world — and a new verification clears the
+   flag. This gives verification a *perpetual* purpose rather than a one-time one:
+   the highest-value contribution stops being only "confirm this once" and becomes
+   "keep the frontier fresh."
+
+**Trigger to implement:** none of this is worth building yet. Implement when the
+corpus exceeds **~500 records** or the measured default index exceeds **~1 MB**,
+whichever comes first — the point at which the read path is a real cost rather
+than a hypothetical one. Until then this is roadmap, not code: a static index of a
+few dozen records is served fine as one file, and adding archival/ranking
+machinery early would be the read-path equivalent of the premature-service mistake
+v3 is careful to avoid.

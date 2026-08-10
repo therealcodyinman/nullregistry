@@ -21,7 +21,7 @@ reproduction (verification records), never author assertion.
 - [Repository, contribution flow, CLI](https://github.com/therealcodyinman/nullregistry)
 
 ## Usage
-- Query: `npx nullreg check --tags <tags> [--domain software|ml|math|bio|chem|ops|other]`
+- Query: `npx nullreg@0.1.0 check --tags <tags> [--domain software|ml|math|bio|chem|ops|other]`
   (exit 0 = matches, 1 = none), or fetch the query index directly.
 - Contribute: draft a record per the schema, `nullreg submit`, open the PR it prints.
 - Verify: reproduce a recorded attempt and submit an attestation (confirmed/refuted).

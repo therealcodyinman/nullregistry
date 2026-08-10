@@ -288,3 +288,75 @@ over the existing Git store.
     enables `--auto` squash-merge. The PAT is an optional human step documented
     below; without it a maintainer re-runs CI and merges. Simplest arrangement that
     keeps the required check in the loop.
+
+---
+
+## v2.1 — security narrowing + cleanup
+
+Architect: Claude. Executor: Cody. Continuing the numbering. This round responds
+to launch feedback (1f916 post 623: neth on read-path scaling, open-chair on
+equivocation, npx pinning, and redaction) plus accumulated small debts.
+
+41. **The inbox bot uses a classic `public_repo` PAT, not a fine-grained one.** The
+    original v1.2 spec assumed a fine-grained PAT scoped to a single repo, but a
+    fine-grained PAT **cannot open PRs against a repository the token owner only
+    collaborates on** — a GitHub-documented gap (fine-grained tokens act only where
+    the owner has direct ownership/selected-repo grants, and cross-account
+    collaborator writes fall outside that). The relay bot pushes a branch and opens
+    a PR on the canonical repo from a separate bot account, so it needs a classic
+    `public_repo`-scoped token. Least privilege here is `public_repo` and nothing
+    more — no `repo` (private), no `workflow`, no admin. The architect's original
+    fine-grained spec is corrected to match what GitHub actually permits.
+
+42. **Tombstone doctrine amendment (NRS-TS-0.1).** The immutability rule gains one
+    narrow, principled carve-out: **claims are never deleted; payloads that are
+    hazards can be reduced to commitments.** Grounds are the SPEC.md §2 exclusions
+    only (secrets, personal data, harm-enabling content); **wrongness is never
+    grounds** — that remains supersession/refutation. A tombstone replaces the body
+    file in place, preserving the filename and the original `id`; because v2 Merkle
+    leaves are record ids (not file bytes), every checkpoint and inclusion proof
+    stays valid, which is the entire reason redaction is expressible without
+    breaking the log. It is signed by the **checkpoint key** (an operator act,
+    publicly attributable), and `original_sha256` commits to the removed bytes
+    without republishing them. CI keeps the registry add-only with exactly this one
+    exception — a body → valid-tombstone transition — while deletion, body → body
+    edits, and tombstone → anything remain forbidden. Spec: `spec/TOMBSTONE.md`;
+    schema: `spec/schema/nrs-tombstone-0.1.schema.json`; enforcement:
+    `registry/scripts/check-add-only.js` + `validate-all.js`.
+
+43. **npx examples pin to `@0.1.0`; future releases publish only from CI with
+    provenance.** Every `npx nullreg` invocation in the docs now pins the audited
+    release (`npx nullreg@0.1.0`); unpinned `latest` is called out in the README as
+    at-your-own-risk. An unpinned `npx nullreg` silently runs whatever is newest on
+    npm, which is a supply-chain footgun for a tool agents invoke automatically.
+    `.github/workflows/publish.yml` is added as a **manual `workflow_dispatch`**
+    that publishes from `cli/` with `npm publish --provenance` using an `NPM_TOKEN`
+    secret and `id-token: write` — so the tarball is attributable to this repo and
+    workflow, not a laptop. It is intentionally **not run** here (the human seats
+    the secret later) and defaults to `--dry-run`. Standing policy from here on:
+    releases publish only from CI, with provenance — never `npm publish` from a
+    developer machine.
+
+44. **Read-path debt is acknowledged, with explicit trigger conditions, and
+    deferred.** neth's point is correct: an append-only ledger has an unbounded
+    *read* cost even though its write semantics are right. The resolution —
+    separating the immutable **ledger** from a bounded, opinionated **lens**
+    (archive the settled into `registry-index-archive.json`, order the default
+    index by confidence so reproduction buys visibility, age `environment_bound`
+    records to a stale flag) — is written up in `spec/ROADMAP.md` but **not built**.
+    Trigger to implement: corpus > ~500 records or measured default index > ~1 MB.
+    Building it earlier would repeat the premature-service mistake v3 exists to
+    avoid; a few-dozen-record static index is served fine as one file today.
+
+45. **Checkpoint roots will be cross-posted to 1f916 threads as an interim
+    equivocation check.** open-chair is right that a single-key signed checkpoint
+    cannot prevent equivocation (signing two internally-consistent histories to
+    different audiences) — only independent witnesses announcing the roots they
+    observed can. Full countersigning witnesses are a v3 item. Until then, the
+    operator will **publicly post each new checkpoint's `size` + `root` to the
+    1f916 thread**, creating an external, timestamped, third-party-visible record
+    of the roots served. It is not cryptographic witnessing, but it makes a split
+    view detectable by anyone who compares the posted root against their own clone
+    — the cheapest available approximation of a witness until the real ones exist.
+    This is also why `MIRRORS.md` now spells out *why* mirrors matter, and why
+    running one is the standing invitation.

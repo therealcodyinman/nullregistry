@@ -5,11 +5,32 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const core = require('../../cli/lib/core.js');
+const tombstone = require('../../cli/lib/tombstone.js');
 const { validate } = require('../../cli/lib/validate.js');
 
 const ROOT = path.join(__dirname, '..');
-const recordSchema = JSON.parse(fs.readFileSync(path.join(ROOT, '..', 'spec', 'schema', 'nrs-0.1.schema.json'), 'utf8'));
-const verifSchema = JSON.parse(fs.readFileSync(path.join(ROOT, '..', 'spec', 'schema', 'nrs-verification-0.1.schema.json'), 'utf8'));
+const SPEC = path.join(ROOT, '..', 'spec');
+const recordSchema = JSON.parse(fs.readFileSync(path.join(SPEC, 'schema', 'nrs-0.1.schema.json'), 'utf8'));
+const verifSchema = JSON.parse(fs.readFileSync(path.join(SPEC, 'schema', 'nrs-verification-0.1.schema.json'), 'utf8'));
+const tombstoneSchema = JSON.parse(fs.readFileSync(path.join(SPEC, 'schema', 'nrs-tombstone-0.1.schema.json'), 'utf8'));
+
+// The pinned checkpoint key authorizes tombstones (an operator act). Absent it,
+// no tombstone can be validated — fail-closed.
+const PINNED_KEY = (() => {
+  const p = path.join(SPEC, 'CHECKPOINT_KEY.pub');
+  if (!fs.existsSync(p)) return null;
+  const m = fs.readFileSync(p, 'utf8').match(/ed25519:[A-Za-z0-9_-]+/);
+  return m ? m[0] : null;
+})();
+
+function checkTombstone(doc, file, idPrefix) {
+  const expectedHash = path.basename(file).replace(/\.json$/, '');
+  const errors = tombstone.validateTombstoneDoc(doc, { schema: tombstoneSchema, pinnedKey: PINNED_KEY, expectedHash });
+  if (typeof doc.id === 'string' && !doc.id.startsWith(idPrefix)) {
+    errors.push('tombstone id must begin with ' + idPrefix);
+  }
+  return errors;
+}
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -27,6 +48,12 @@ for (const file of recordFiles) {
   const rel = path.relative(ROOT, file);
   try {
     const record = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (tombstone.isTombstone(record)) {
+      const errors = checkTombstone(record, file, 'nr:sha256:');
+      if (errors.length) { failures++; console.error('FAIL ' + rel + '\n  ' + errors.join('\n  ')); }
+      else { allIds.add(record.id); console.log('ok   ' + rel + ' [tombstone]'); }
+      continue;
+    }
     const errors = validate(recordSchema, record);
     const expectedId = core.computeId(record);
     if (record.id !== expectedId) errors.push('content hash mismatch (expected ' + expectedId + ')');
@@ -52,6 +79,12 @@ for (const file of verifFiles) {
   const rel = path.relative(ROOT, file);
   try {
     const v = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (tombstone.isTombstone(v)) {
+      const errors = checkTombstone(v, file, 'nrv:sha256:');
+      if (errors.length) { failures++; console.error('FAIL ' + rel + '\n  ' + errors.join('\n  ')); }
+      else console.log('ok   ' + rel + ' [tombstone]');
+      continue;
+    }
     const errors = validate(verifSchema, v);
     const expectedId = core.computeVerificationId(v);
     if (v.id !== expectedId) errors.push('content hash mismatch (expected ' + expectedId + ')');

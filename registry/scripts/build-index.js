@@ -17,12 +17,17 @@ function walk(dir) {
 const verifications = walk(path.join(ROOT, 'verifications')).map((f) => JSON.parse(fs.readFileSync(f, 'utf8')));
 const byTarget = {};
 for (const v of verifications) {
+  if (v.tombstone_version !== undefined) continue; // redacted verification: no target/verdict to tally
   byTarget[v.references] = byTarget[v.references] || { confirmed: 0, refuted: 0 };
   byTarget[v.references][v.verdict]++;
 }
 
 const records = walk(path.join(ROOT, 'records')).map((f) => {
   const r = JSON.parse(fs.readFileSync(f, 'utf8'));
+  // A tombstoned record keeps its id and place in the log but carries no content.
+  if (r.tombstone_version !== undefined) {
+    return { id: r.id, redacted: true, grounds: r.grounds };
+  }
   return {
     id: r.id,
     domain: r.problem.fingerprint.domain,
