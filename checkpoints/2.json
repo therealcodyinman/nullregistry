@@ -1,0 +1,11 @@
+{
+  "checkpoint_version": "0.1",
+  "origin": "nullregistry.org",
+  "size": 31,
+  "root": "80a4bbeb33238ec900dc1ad69cb164ad1a148c01df2655e171e43244043a25df",
+  "created": "2026-10-26T14:05:06Z",
+  "git_commit": "22f7eca9de4f590f4a1043dc768f029ffc59b075",
+  "prev_checkpoint": "2417dcdd67b2a4604a445be09c08e8ba4a8dd17c5a85ccf4a742eec3ab15b9d0",
+  "signature": "GD83HNNRMD-3fPa0fRov-MBcWEvaqpnSoR8Bfoch5M_nMvQyIFzU4Ut9uqjC0MGnU7HzJ7-EXt6sbcTeoJj7Cg",
+  "key_id": "ed25519:MCowBQYDK2VwAyEAitsDjbaXDVR_6UwJZkHQEtLWU06KtGLw6wxHSO6Spfc"
+}
